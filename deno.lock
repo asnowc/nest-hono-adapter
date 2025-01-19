@@ -1,0 +1,149 @@
+{
+  "version": "4",
+  "specifiers": {
+    "jsr:@hono/hono@^4.6.17": "4.6.17",
+    "jsr:@std/assert@1": "1.0.10",
+    "jsr:@std/assert@^1.0.10": "1.0.10",
+    "jsr:@std/data-structures@^1.0.6": "1.0.6",
+    "jsr:@std/expect@^1.0.11": "1.0.11",
+    "jsr:@std/fs@^1.0.9": "1.0.9",
+    "jsr:@std/internal@^1.0.5": "1.0.5",
+    "jsr:@std/path@^1.0.8": "1.0.8",
+    "jsr:@std/testing@^1.0.9": "1.0.9",
+    "npm:@hono/node-server@^1.13.7": "1.13.7_hono@4.6.17",
+    "npm:@nestjs/common@^11.0.1": "11.0.1_reflect-metadata@0.2.2_rxjs@7.8.1",
+    "npm:@nestjs/core@^11.0.1": "11.0.1_@nestjs+common@11.0.1__reflect-metadata@0.2.2__rxjs@7.8.1_reflect-metadata@0.2.2_rxjs@7.8.1"
+  },
+  "jsr": {
+    "@hono/hono@4.6.17": {
+      "integrity": "932fcc61d043b14a8b2cb65242716eb32da44e91f2ee117fd7390508669fea31"
+    },
+    "@std/assert@1.0.10": {
+      "integrity": "59b5cbac5bd55459a19045d95cc7c2ff787b4f8527c0dd195078ff6f9481fbb3",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
+    },
+    "@std/data-structures@1.0.6": {
+      "integrity": "76a7fd8080c66604c0496220a791860492ab21a04a63a969c0b9a0609bbbb760"
+    },
+    "@std/expect@1.0.11": {
+      "integrity": "5aa5d5cf891e9a3249e45ea770de15189e5a2faee2122ee5746b10d1c310a19b",
+      "dependencies": [
+        "jsr:@std/assert@^1.0.10",
+        "jsr:@std/internal"
+      ]
+    },
+    "@std/fs@1.0.9": {
+      "integrity": "3eef7e3ed3d317b29432c7dcb3b20122820dbc574263f721cb0248ad91bad890",
+      "dependencies": [
+        "jsr:@std/path"
+      ]
+    },
+    "@std/internal@1.0.5": {
+      "integrity": "54a546004f769c1ac9e025abd15a76b6671ddc9687e2313b67376125650dc7ba"
+    },
+    "@std/path@1.0.8": {
+      "integrity": "548fa456bb6a04d3c1a1e7477986b6cffbce95102d0bb447c67c4ee70e0364be"
+    },
+    "@std/testing@1.0.9": {
+      "integrity": "9bdd4ac07cb13e7594ac30e90f6ceef7254ac83a9aeaa089be0008f33aab5cd4",
+      "dependencies": [
+        "jsr:@std/assert@^1.0.10",
+        "jsr:@std/data-structures",
+        "jsr:@std/fs",
+        "jsr:@std/internal",
+        "jsr:@std/path"
+      ]
+    }
+  },
+  "npm": {
+    "@hono/node-server@1.13.7_hono@4.6.17": {
+      "integrity": "sha512-kTfUMsoloVKtRA2fLiGSd9qBddmru9KadNyhJCwgKBxTiNkaAJEwkVN9KV/rS4HtmmNRtUh6P+YpmjRMl0d9vQ==",
+      "dependencies": [
+        "hono"
+      ]
+    },
+    "@lukeed/csprng@1.1.0": {
+      "integrity": "sha512-Z7C/xXCiGWsg0KuKsHTKJxbWhpI3Vs5GwLfOean7MGyVFGqdRgBbAjOCh6u4bbjPc/8MJ2pZmK/0DLdCbivLDA=="
+    },
+    "@nestjs/common@11.0.1_reflect-metadata@0.2.2_rxjs@7.8.1": {
+      "integrity": "sha512-GbPKvDz/sYjhR86ebZu+0F5jAvYDZDXY5WcHek9gkEkMI9eIo3xeH/F/tNIPhdyeWp3eG+kNWqR9VPtC18G+TA==",
+      "dependencies": [
+        "iterare",
+        "reflect-metadata",
+        "rxjs",
+        "tslib",
+        "uid"
+      ]
+    },
+    "@nestjs/core@11.0.1_@nestjs+common@11.0.1__reflect-metadata@0.2.2__rxjs@7.8.1_reflect-metadata@0.2.2_rxjs@7.8.1": {
+      "integrity": "sha512-Yn7X2aInjmX7yxpH8TjJmgC0JPvs+tcreETkquSRmKbuK5J28dZDi8loiaw3eRTLLvzzUovv5mlqFxmVhDESOw==",
+      "dependencies": [
+        "@nestjs/common",
+        "@nuxt/opencollective",
+        "fast-safe-stringify",
+        "iterare",
+        "path-to-regexp",
+        "reflect-metadata",
+        "rxjs",
+        "tslib",
+        "uid"
+      ]
+    },
+    "@nuxt/opencollective@0.4.1": {
+      "integrity": "sha512-GXD3wy50qYbxCJ652bDrDzgMr3NFEkIS374+IgFQKkCvk9yiYcLvX2XDYr7UyQxf4wK0e+yqDYRubZ0DtOxnmQ==",
+      "dependencies": [
+        "consola"
+      ]
+    },
+    "consola@3.4.0": {
+      "integrity": "sha512-EiPU8G6dQG0GFHNR8ljnZFki/8a+cQwEQ+7wpxdChl02Q8HXlwEZWD5lqAF8vC2sEC3Tehr8hy7vErz88LHyUA=="
+    },
+    "fast-safe-stringify@2.1.1": {
+      "integrity": "sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA=="
+    },
+    "hono@4.6.17": {
+      "integrity": "sha512-Kbh4M0so2RzLiIg6iP33DoTU68TdvP2O/kb1Hhhdwa37fazuf402ig8ZRfjkz2dqXwiWl2dAgh0f++TuKAdOtQ=="
+    },
+    "iterare@1.2.1": {
+      "integrity": "sha512-RKYVTCjAnRthyJes037NX/IiqeidgN1xc3j1RjFfECFp28A1GVwK9nA+i0rJPaHqSZwygLzRnFlzUuHFoWWy+Q=="
+    },
+    "path-to-regexp@8.2.0": {
+      "integrity": "sha512-TdrF7fW9Rphjq4RjrW0Kp2AW0Ahwu9sRGTkS6bvDi0SCwZlEZYmcfDbEsTz8RVk0EHIS/Vd1bv3JhG+1xZuAyQ=="
+    },
+    "reflect-metadata@0.2.2": {
+      "integrity": "sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q=="
+    },
+    "rxjs@7.8.1": {
+      "integrity": "sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==",
+      "dependencies": [
+        "tslib"
+      ]
+    },
+    "tslib@2.8.1": {
+      "integrity": "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="
+    },
+    "uid@2.0.2": {
+      "integrity": "sha512-u3xV3X7uzvi5b1MncmZo3i2Aw222Zk1keqLA1YkHldREkAhAqi65wuPfe7lHx8H/Wzy+8CE7S7uS3jekIM5s8g==",
+      "dependencies": [
+        "@lukeed/csprng"
+      ]
+    }
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@hono/hono@^4.6.17",
+      "jsr:@std/assert@1",
+      "jsr:@std/expect@^1.0.11",
+      "jsr:@std/testing@^1.0.9"
+    ],
+    "packageJson": {
+      "dependencies": [
+        "npm:@hono/node-server@^1.13.7",
+        "npm:@nestjs/common@^11.0.1",
+        "npm:@nestjs/core@^11.0.1"
+      ]
+    }
+  }
+}

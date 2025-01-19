@@ -1,0 +1,21 @@
+{
+  "name": "@asla/nest-hono-adapter",
+  "tasks": {
+    "dev": "deno run --watch main.ts"
+  },
+  "imports": {
+    "@asla/nest-hono-adapter": "./src/mod.ts",
+    "@std/expect": "jsr:@std/expect@^1.0.11",
+    "@std/testing": "jsr:@std/testing@^1.0.9",
+    "hono": "jsr:@hono/hono@^4.6.17",
+    "@hono/hono": "jsr:@hono/hono@^4.6.17",
+    "@std/assert": "jsr:@std/assert@1"
+  },
+  "fmt": {
+    "lineWidth": 120
+  },
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}
