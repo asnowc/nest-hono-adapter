@@ -1,4 +1,8 @@
-The adapter for Nest is implemented using Hono
+## The adapter for Nest is implemented using Hono
+
+**Required Nest >=10**
+
+### Usage
 
 ```ts
 import { NestFactory } from "@nestjs/core";

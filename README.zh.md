@@ -1,4 +1,8 @@
-使用 Hono 实现了 Nest 的适配器
+## 使用 Hono 实现了 Nest 的适配器
+
+**要求 Nest >=10**
+
+### 使用
 
 ```ts
 import { NestFactory } from "@nestjs/core";

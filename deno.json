@@ -13,6 +13,8 @@
 
     "@hono/hono": "jsr:@hono/hono@^4.6.17",
 
+    "@nestjs/common": "npm:@nestjs/common@^10.4.15",
+    "@nestjs/core": "npm:@nestjs/core@^10.4.15",
     "hono": "jsr:@hono/hono@^4.6.17",
     "@asla/nest-hono-adapter": "./src/mod.ts"
   },

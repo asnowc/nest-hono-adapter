@@ -17,11 +17,11 @@ import type { BlankEnv, BlankSchema } from "hono/types";
 import type { NestHandler } from "./nest.ts";
 import { createHonoRes, createHonoReq, sendResult, HonoReq, HonoRes } from "./_util.ts";
 import type { HonoApplicationExtra, HonoBodyParser } from "./hono.impl.ts";
+import type { CorsOptions, CorsOptionsDelegate } from "@nestjs/common/interfaces/external/cors-options.interface.js";
 
-export type CORSOptions = NonNullable<Parameters<typeof cors>[0]>;
+type HonoCORSOptions = NonNullable<Parameters<typeof cors>[0]>;
 
 const NEST_HEADERS = Symbol("nest_headers");
-type HonoContext = Context;
 
 type NestHonoHandler = NestHandler<HonoReq, HonoRes>;
 
@@ -149,8 +149,8 @@ export class HonoAdapter<E extends Env = BlankEnv, S extends Schema = BlankSchem
     throw new Error("Method not implemented."); //TODO setViewEngine
   }
   //implement
-  getRequestHostname(ctx: HonoContext): string {
-    return ctx.req.header().host;
+  getRequestHostname(request: HonoReq): string {
+    return request.header("Host") ?? "";
   }
   //implement
   getRequestMethod(request: HonoRequest): string {
@@ -161,55 +161,55 @@ export class HonoAdapter<E extends Env = BlankEnv, S extends Schema = BlankSchem
     return request.url;
   }
   // implement
-  status(ctx: HonoContext, statusCode: StatusCode) {
-    ctx.status(statusCode);
+  status(res: HonoRes, statusCode: StatusCode) {
+    res.status(statusCode);
   }
   //implement
   /**
    * 回复数据
    */
-  reply(ctx: HonoRes, body: any, statusCode?: StatusCode) {
-    if (statusCode) ctx.status(statusCode);
-    ctx.send(body);
+  reply(res: HonoRes, body: any, statusCode?: StatusCode) {
+    if (statusCode) res.status(statusCode);
+    res.send(body);
   }
   /**
    * implement
    * 没有响应数据时，用于结束http响应
    */
-  end(ctx: HonoRes, message?: string) {
-    ctx.send(message ?? null);
+  end(res: HonoRes, message?: string) {
+    res.send(message ?? null);
   }
   //implement
-  render(ctx: HonoRes, view: string | Promise<string>, options: any) {
-    ctx.send(ctx.render(view));
+  render(res: HonoRes, view: string | Promise<string>, options: any) {
+    res.send(res.render(view));
   }
 
   //implement
-  redirect(ctx: HonoRes, statusCode: RedirectStatusCode, url: string) {
-    ctx.send(ctx.redirect(url, statusCode));
+  redirect(res: HonoRes, statusCode: RedirectStatusCode, url: string) {
+    res.send(res.redirect(url, statusCode));
   }
   //implement
   setErrorHandler(handler: ErrorHandler<HonoReq, HonoRes>) {
-    this.instance.onError(async (err: Error, ctx: HonoContext) => {
+    this.instance.onError(async (err: Error, ctx: Context) => {
       await handler(err, createHonoReq(ctx, { body: {}, params: {}, rawBody: undefined }), createHonoRes(ctx));
       return sendResult(ctx, {});
     });
   }
   //implement
   setNotFoundHandler(handler: RequestHandler<HonoReq, HonoRes>) {
-    this.instance.notFound(async (ctx: HonoContext) => {
+    this.instance.notFound(async (ctx: Context) => {
       await handler(createHonoReq(ctx, { body: {}, params: {}, rawBody: undefined }), createHonoRes(ctx));
       return sendResult(ctx, {});
     });
   }
 
   //implement
-  isHeadersSent(ctx: HonoRes): boolean {
-    return ctx.finalized;
+  isHeadersSent(res: HonoRes): boolean {
+    return res.finalized;
   }
   //implement
-  setHeader(ctx: HonoContext, name: string, value: string) {
-    Reflect.get(ctx, NEST_HEADERS)[name] = value.toLowerCase();
+  setHeader(res: HonoRes, name: string, value: string) {
+    Reflect.get(res, NEST_HEADERS)[name] = value.toLowerCase();
   }
 
   //implement
@@ -228,14 +228,32 @@ export class HonoAdapter<E extends Env = BlankEnv, S extends Schema = BlankSchem
 
     this.#isParserRegistered = true;
   }
+
   //implement
-  enableCors(options?: CORSOptions) {
-    this.instance.use(cors(options));
+  override enableCors(options: CorsOptions | CorsOptionsDelegate<HonoReq>, prefix?: string) {
+    if (typeof options === "function") throw new Error("options must be an object");
+    let { origin } = options;
+    function toArray<T>(item?: T | T[]): T[] | undefined {
+      if (!item) return undefined;
+      return item instanceof Array ? item : [item];
+    }
+    if (typeof origin === "function") origin = undefined; //TODO
+    this.instance.use(
+      cors({
+        //@ts-ignore 需要转换
+        origin: options.origin, //TODO
+        allowHeaders: toArray(options.allowedHeaders),
+        allowMethods: toArray(options.methods),
+        exposeHeaders: toArray(options.exposedHeaders),
+        credentials: options.credentials,
+        maxAge: options.maxAge,
+      })
+    );
   }
   //implement
   createMiddlewareFactory(requestMethod: RequestMethod): (path: string, callback: Function) => any {
     return (path: string, callback: Function) => {
-      async function handler(ctx: HonoContext, next: Function) {
+      async function handler(ctx: Context, next: Function) {
         await callback(ctx.req, ctx, next);
       }
       const hono = this.instance;
@@ -281,6 +299,10 @@ export class HonoAdapter<E extends Env = BlankEnv, S extends Schema = BlankSchem
   applyVersionFilter(): () => () => any {
     throw new Error("Versioning not yet supported in Hono"); //TODO applyVersionFilter
   }
+  //implement
+  override getHeader = undefined;
+  //implement
+  override appendHeader = undefined;
 }
 function getRouteAndHandler(
   pathOrHandler: string | NestHonoHandler,
