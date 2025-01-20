@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "description": "",
   "type": "module",
-
+  "scripts": {
+    "build": "npm exec --package=typescript@5 tsc"
+  },
   "exports": "./dist/mod.js",
   "peerDependencies": {
     "@nestjs/common": "^10.4.15",

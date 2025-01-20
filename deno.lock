@@ -1,7 +1,6 @@
 {
   "version": "4",
   "specifiers": {
-    "jsr:@hono/hono@^4.6.17": "4.6.17",
     "jsr:@std/assert@1": "1.0.10",
     "jsr:@std/assert@^1.0.10": "1.0.10",
     "jsr:@std/async@^1.0.9": "1.0.9",
@@ -14,12 +13,10 @@
     "npm:@hono/node-server@^1.13.7": "1.13.7_hono@4.6.17",
     "npm:@nestjs/common@^10.4.15": "10.4.15_reflect-metadata@0.2.2_rxjs@7.8.1",
     "npm:@nestjs/core@^10.4.15": "10.4.15_@nestjs+common@10.4.15__reflect-metadata@0.2.2__rxjs@7.8.1_reflect-metadata@0.2.2_rxjs@7.8.1",
-    "npm:@types/node@^22.10.7": "22.10.7"
+    "npm:@types/node@^22.10.7": "22.10.7",
+    "npm:hono@^4.6.17": "4.6.17"
   },
   "jsr": {
-    "@hono/hono@4.6.17": {
-      "integrity": "932fcc61d043b14a8b2cb65242716eb32da44e91f2ee117fd7390508669fea31"
-    },
     "@std/assert@1.0.10": {
       "integrity": "59b5cbac5bd55459a19045d95cc7c2ff787b4f8527c0dd195078ff6f9481fbb3",
       "dependencies": [
@@ -200,12 +197,12 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@hono/hono@^4.6.17",
       "jsr:@std/assert@1",
       "jsr:@std/expect@^1.0.11",
       "jsr:@std/testing@^1.0.9",
       "npm:@nestjs/common@^10.4.15",
-      "npm:@nestjs/core@^10.4.15"
+      "npm:@nestjs/core@^10.4.15",
+      "npm:hono@^4.6.17"
     ],
     "packageJson": {
       "dependencies": [

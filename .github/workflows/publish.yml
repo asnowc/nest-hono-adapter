@@ -27,10 +27,9 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
       - name: Build
-        run: npm exec --package=typescript@5 tsc
+        run: npm run build
 
-      - name: Publish
-        run: pnpm publish --no-git-checks
+      - run: npm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       # - name: Publish-Jsr
