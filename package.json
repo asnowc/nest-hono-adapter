@@ -21,6 +21,10 @@
   "files": ["dist/**"],
   "keywords": ["nest", "nestjs", "hono", "nest-hono-adapter", "nest adapter"],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asnowc/nest-hono-adapter.git"
+  },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org",
