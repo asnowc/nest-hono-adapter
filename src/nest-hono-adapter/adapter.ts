@@ -5,7 +5,7 @@ import { serveStatic } from "hono/deno";
 import type { ServeStaticOptions } from "hono/serve-static";
 import { bodyLimit as bodyLimitMid } from "hono/body-limit";
 import { cors } from "hono/cors";
-import { RedirectStatusCode, StatusCode } from "hono/utils/http-status";
+import type { RedirectStatusCode, StatusCode } from "hono/utils/http-status";
 
 import { Logger, RequestMethod } from "@nestjs/common";
 import type { ErrorHandler, NestApplicationOptions, RequestHandler } from "@nestjs/common/interfaces";
@@ -14,7 +14,7 @@ import * as http from "node:http";
 
 import * as https from "node:https";
 import type { BlankEnv, BlankSchema } from "hono/types";
-import { NestHandler } from "./nest.ts";
+import type { NestHandler } from "./nest.ts";
 import { createHonoRes, createHonoReq, sendResult, HonoReq, HonoRes } from "./_util.ts";
 import type { HonoApplicationExtra, HonoBodyParser } from "./hono.impl.ts";
 
