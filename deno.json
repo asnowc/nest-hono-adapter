@@ -2,8 +2,7 @@
   "name": "@asn/nest-hono-adapter",
   "version": "0.1.0",
   "tasks": {
-    "dev": "deno run --watch main.ts",
-    "test": "deno test"
+    "test": "deno test -A"
   },
   "exports": "./src/mod.ts",
   "imports": {
