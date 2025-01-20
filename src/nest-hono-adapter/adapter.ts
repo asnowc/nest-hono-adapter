@@ -19,7 +19,7 @@ import { createHonoRes, createHonoReq, sendResult, HonoReq, HonoRes } from "./_u
 import type { HonoApplicationExtra, HonoBodyParser } from "./hono.impl.ts";
 import type { CorsOptions, CorsOptionsDelegate } from "@nestjs/common/interfaces/external/cors-options.interface.js";
 
-type HonoCORSOptions = NonNullable<Parameters<typeof cors>[0]>;
+export type CORSOptions = Partial<NonNullable<Parameters<typeof cors>[0]>>;
 
 const NEST_HEADERS = Symbol("nest_headers");
 
@@ -230,25 +230,10 @@ export class HonoAdapter<E extends Env = BlankEnv, S extends Schema = BlankSchem
   }
 
   //implement
-  override enableCors(options: CorsOptions | CorsOptionsDelegate<HonoReq>, prefix?: string) {
-    if (typeof options === "function") throw new Error("options must be an object");
-    let { origin } = options;
-    function toArray<T>(item?: T | T[]): T[] | undefined {
-      if (!item) return undefined;
-      return item instanceof Array ? item : [item];
-    }
-    if (typeof origin === "function") origin = undefined; //TODO
-    this.instance.use(
-      cors({
-        //@ts-ignore 需要转换
-        origin: options.origin, //TODO
-        allowHeaders: toArray(options.allowedHeaders),
-        allowMethods: toArray(options.methods),
-        exposeHeaders: toArray(options.exposedHeaders),
-        credentials: options.credentials,
-        maxAge: options.maxAge,
-      })
-    );
+  override enableCors(options?: CORSOptions): void;
+  override enableCors(options: any): void;
+  override enableCors(options?: any) {
+    this.instance.use(cors(options));
   }
   //implement
   createMiddlewareFactory(requestMethod: RequestMethod): (path: string, callback: Function) => any {
@@ -317,4 +302,22 @@ function getRouteAndHandler(
     handler = handler!;
   }
   return [path, handler];
+}
+function transformsNestCrosOption(options: CorsOptions | CorsOptionsDelegate<HonoReq> = {}): CORSOptions {
+  if (typeof options === "function") throw new Error("options must be an object");
+  let { origin } = options;
+  if (typeof origin === "function") origin = undefined; //TODO
+  return {
+    //@ts-ignore 需要转换
+    origin, //TODO
+    allowHeaders: toArray(options.allowedHeaders),
+    allowMethods: toArray(options.methods),
+    exposeHeaders: toArray(options.exposedHeaders),
+    credentials: options.credentials,
+    maxAge: options.maxAge,
+  };
+}
+function toArray<T>(item?: T | T[]): T[] | undefined {
+  if (!item) return undefined;
+  return item instanceof Array ? item : [item];
 }

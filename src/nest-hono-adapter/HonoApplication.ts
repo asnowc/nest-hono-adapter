@@ -1,12 +1,12 @@
 import { INestApplication } from "@nestjs/common";
 import { ServerType } from "@hono/node-server";
 import { HonoApplicationExtra, HonoBodyParser } from "./hono.impl.ts";
-import { HonoAdapter } from "./adapter.ts";
+import { HonoAdapter, CORSOptions } from "./adapter.ts";
 
 export interface NestHonoApplication<TServer extends ServerType = ServerType>
   extends INestApplication<TServer>,
     HonoApplicationExtra {
-  getHttpAdapter(): HonoAdapter;
+  // getHttpAdapter(): HonoAdapter;
   /**
    * By default, `application/json`, `application/x-www-form-urlencoded`, `multipart/form-data` and `text/plain` are automatically resolved
    * You can customize the parser, for example to parse the `application/custom` request body unmapped
@@ -26,4 +26,6 @@ export interface NestHonoApplication<TServer extends ServerType = ServerType>
    * }
    */
   useBodyParser(contentType: string, parser: HonoBodyParser): void;
+  enableCors(options?: CORSOptions): void;
+  enableCors(options: any): void;
 }
