@@ -60,7 +60,11 @@ export class HonoAdapter<E extends Env = BlankEnv, S extends Schema = BlankSchem
         const parser = this.#bodyParsers.get(contentType);
         if (parser) body = await parser(ctx.req);
       }
-      await routeHandler(createHonoReq(ctx.req, body, ctx.req.param(), undefined), createHonoRes(ctx), next);
+      await routeHandler(
+        createHonoReq(ctx, { body, params: ctx.req.param(), rawBody: undefined }),
+        createHonoRes(ctx),
+        next
+      );
       return sendResult(ctx, nestHeaders);
     };
   }
@@ -187,14 +191,14 @@ export class HonoAdapter<E extends Env = BlankEnv, S extends Schema = BlankSchem
   //implement
   setErrorHandler(handler: ErrorHandler<HonoReq, HonoRes>) {
     this.instance.onError(async (err: Error, ctx: HonoContext) => {
-      await handler(err, createHonoReq(ctx.req, {}, {}, undefined), createHonoRes(ctx));
+      await handler(err, createHonoReq(ctx, { body: {}, params: {}, rawBody: undefined }), createHonoRes(ctx));
       return sendResult(ctx, {});
     });
   }
   //implement
   setNotFoundHandler(handler: RequestHandler<HonoReq, HonoRes>) {
     this.instance.notFound(async (ctx: HonoContext) => {
-      await handler(createHonoReq(ctx.req, {}, {}, undefined), createHonoRes(ctx));
+      await handler(createHonoReq(ctx, { body: {}, params: {}, rawBody: undefined }), createHonoRes(ctx));
       return sendResult(ctx, {});
     });
   }
@@ -205,7 +209,7 @@ export class HonoAdapter<E extends Env = BlankEnv, S extends Schema = BlankSchem
   }
   //implement
   setHeader(ctx: HonoContext, name: string, value: string) {
-    Reflect.get(ctx, NEST_HEADERS)[name] = value;
+    Reflect.get(ctx, NEST_HEADERS)[name] = value.toLowerCase();
   }
 
   //implement

@@ -1,19 +1,23 @@
 import { HonoRequest } from "hono/request";
 import { NestReq } from "./nest.ts";
 import type { Context } from "hono";
+import { getConnInfo } from "hono/cloudflare-workers";
 
 export function createHonoReq(
-  req: HonoRequest,
-  body: Record<string, any>,
-  params: Record<string, string>,
-  rawBody: any
+  ctx: Context,
+  info: {
+    body: Record<string, any>;
+    params: Record<string, string>;
+    rawBody: any;
+  }
 ): HonoReq {
-  const honoReq = req as HonoReq;
+  const { body, params, rawBody } = info;
+  const honoReq = ctx.req as HonoReq;
   let url: URL | undefined;
   const nestReq: NestReq = {
     rawBody,
     body,
-    headers: new Proxy(req.raw.headers, {
+    headers: new Proxy(honoReq.raw.headers, {
       get(target: Headers, p) {
         return target.get(p as string);
       },
@@ -25,17 +29,17 @@ export function createHonoReq(
       {},
       {
         get(target: any, p) {
-          if (!url) url = new URL(req.url);
+          if (!url) url = new URL(honoReq.url);
           return url.searchParams.get(p as string);
         },
         ownKeys(target: any) {
-          if (!url) url = new URL(req.url);
+          if (!url) url = new URL(honoReq.url);
           return Array.from(url.searchParams.keys());
         },
       }
     ),
-    session: undefined, //TODO session
-    ip: "", //TODO ip
+    ip: getConnInfo(ctx).remote.address as string,
+    session: ctx.get("session") ?? {},
     hosts: {}, //TODO hosts
     files: {}, //TODO files
     params: params,
@@ -56,14 +60,20 @@ export function createHonoRes(context: Context): HonoRes {
 }
 export function sendResult(ctx: Context, headers: Record<string, string>) {
   const body = Reflect.get(ctx, NEST_BODY);
-  if (body instanceof Response) return body;
+  if (body instanceof Response) {
+    Object.entries(headers).forEach(([key, value]) => body.headers.set(key, value));
+    return body;
+  }
 
-  const responseContentType = headers["Content-Type"] || headers["content-type"];
+  let responseContentType = headers["content-type"];
+
   if (responseContentType) {
+    const i = responseContentType.indexOf(";");
+    if (i > 0) responseContentType = responseContentType.slice(0, i);
     switch (responseContentType) {
       case "application/json":
         return ctx.json(body, undefined, headers);
-      case "text/xp": //TODO
+      case "text/plain":
         return ctx.text(body, undefined, headers);
       case "text/html":
         return ctx.html(body, undefined, headers);
@@ -89,7 +99,7 @@ export function sendResult(ctx: Context, headers: Record<string, string>) {
         return ctx.body(null, undefined, headers);
       }
       default:
-        return ctx.json({ message: "Nest reply unknown data type" }, 500, headers);
+        return ctx.text("HonoAdapter cannot convert unknown types", 500, headers);
     }
   }
 }

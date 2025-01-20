@@ -37,3 +37,13 @@ Deno.test("使用 @Redirect() 重定向", async function () {
 
   assertEquals(res.headers.get("location"), "http://www.baidu.com");
 });
+Deno.test("使用 @HttpCode() 设定响应状态码", async function () {
+  const { hono } = app;
+  const res = await hono.request("/statusCode");
+  expect(res.status).toBe(202);
+});
+Deno.test("使用 @Header() 设定响应头", async function () {
+  const { hono } = app;
+  const res = await hono.request("/header");
+  expect(res.headers.get("abc")).toBe("123");
+});

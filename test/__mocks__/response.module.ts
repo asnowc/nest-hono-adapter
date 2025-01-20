@@ -1,4 +1,4 @@
-import { Module, Controller, Get, Redirect } from "@nestjs/common";
+import { Module, Controller, Get, Redirect, HttpCode, Header } from "@nestjs/common";
 
 @Controller()
 class ExampleController {
@@ -18,6 +18,23 @@ class ExampleController {
   @Get("redirect")
   redirect() {
     return 1;
+  }
+  @HttpCode(202)
+  @Get("statusCode")
+  statusCode() {}
+
+  @Header("abc", "123")
+  @Get("header")
+  header() {}
+
+  @Get("uint8Array")
+  uint8Array() {
+    return new Uint8Array(20);
+  }
+
+  @Get("readableStream")
+  readableStream() {
+    return ReadableStream.from([]);
   }
 }
 

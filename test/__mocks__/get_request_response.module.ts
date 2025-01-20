@@ -11,6 +11,8 @@ class ExampleController {
   res(@Res() res: HonoResponse) {
     res.send(res.text("/res"));
   }
+  @Get("resNoSend")
+  resNoSend(@Res() res: HonoResponse) {}
 }
 
 @Module({

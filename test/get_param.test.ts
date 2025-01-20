@@ -37,3 +37,23 @@ Deno.test("使用 @Body() 获取 未解析的 body", async function () {
   const text = await res.text();
   assertEquals(text, "");
 });
+Deno.test("使用 @Headers() 获取请求头", async function () {
+  const { hono } = app;
+  const res = await hono.request("/headers", { headers: { abc: "123" } });
+  const text = await res.text();
+  assertEquals(text, "123");
+});
+//TODO
+Deno.test("使用 @HostParam() 获取 host", { ignore: true }, async function () {
+  const { hono } = app;
+  const res = await hono.request("/HostParam", { headers: { host: "abc.com" } });
+  const text = await res.text();
+  assertEquals(text, "abc.com");
+});
+//TODO
+Deno.test("使用 @Ip() 获取 ip", { ignore: true }, async function () {
+  const { hono } = app;
+  const res = await hono.request("/ip", {});
+  const text = await res.text();
+  assertEquals(text, "127.0.0.1");
+});

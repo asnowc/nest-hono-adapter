@@ -21,3 +21,9 @@ Deno.test("使用 @Res() 获取响应", async function () {
   const data = await res.text();
   assertEquals(data, "/res");
 });
+Deno.test("使用 @Res() 获取响应, 但函数返回前未调用 send(), 将响应空的 body", async function () {
+  const { hono } = app;
+  const res = await hono.request("/resNoSend");
+  expect(res.status).toBe(200);
+  expect(await res.text()).toBe("");
+});
