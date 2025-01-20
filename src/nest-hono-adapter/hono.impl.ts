@@ -1,13 +1,10 @@
-import { HonoRequest } from "hono/request";
-import { NestReq } from "./nest.ts";
+import type * as honoReq from "hono/request";
 import type { ServeStaticOptions } from "hono/serve-static";
-import type { Context } from "hono";
+import type { HonoRes } from "./_util.ts";
 
-export type HonoReq = NestReq & HonoRequest;
+export type HonoRequest = honoReq.HonoRequest;
+export type HonoResponse = HonoRes;
 
-export type HonoRes = Omit<Context, "req"> & {
-  send(data?: any): void;
-};
 export interface HonoApplicationExtra {
   useBodyParser(contentType: string, parser: HonoBodyParser): void;
 

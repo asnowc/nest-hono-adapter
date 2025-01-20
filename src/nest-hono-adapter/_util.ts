@@ -1,11 +1,14 @@
 import { HonoRequest } from "hono/request";
 import { NestReq } from "./nest.ts";
 import type { Context } from "hono";
-import { HonoReq, HonoRes } from "./hono.impl.ts";
 
-export function createHonoReq(req: HonoRequest, body: any, rawBody: any): HonoReq {
+export function createHonoReq(
+  req: HonoRequest,
+  body: Record<string, any>,
+  params: Record<string, string>,
+  rawBody: any
+): HonoReq {
   const honoReq = req as HonoReq;
-
   let url: URL | undefined;
   const nestReq: NestReq = {
     rawBody,
@@ -35,7 +38,7 @@ export function createHonoReq(req: HonoRequest, body: any, rawBody: any): HonoRe
     ip: "", //TODO ip
     hosts: {}, //TODO hosts
     files: {}, //TODO files
-    params: req.param(),
+    params: params,
   };
   Object.assign(honoReq, nestReq);
   return honoReq;
@@ -90,5 +93,11 @@ export function sendResult(ctx: Context, headers: Record<string, string>) {
     }
   }
 }
+
+export type HonoReq = NestReq & HonoRequest;
+
+export type HonoRes = Omit<Context, "req"> & {
+  send(data?: any): void;
+};
 
 const NEST_BODY = Symbol("nest_body");

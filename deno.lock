@@ -4,6 +4,7 @@
     "jsr:@hono/hono@^4.6.17": "4.6.17",
     "jsr:@std/assert@1": "1.0.10",
     "jsr:@std/assert@^1.0.10": "1.0.10",
+    "jsr:@std/async@^1.0.9": "1.0.9",
     "jsr:@std/data-structures@^1.0.6": "1.0.6",
     "jsr:@std/expect@^1.0.11": "1.0.11",
     "jsr:@std/fs@^1.0.9": "1.0.9",
@@ -12,7 +13,8 @@
     "jsr:@std/testing@^1.0.9": "1.0.9",
     "npm:@hono/node-server@^1.13.7": "1.13.7_hono@4.6.17",
     "npm:@nestjs/common@^11.0.1": "11.0.1_reflect-metadata@0.2.2_rxjs@7.8.1",
-    "npm:@nestjs/core@^11.0.1": "11.0.1_@nestjs+common@11.0.1__reflect-metadata@0.2.2__rxjs@7.8.1_reflect-metadata@0.2.2_rxjs@7.8.1"
+    "npm:@nestjs/core@^11.0.1": "11.0.1_@nestjs+common@11.0.1__reflect-metadata@0.2.2__rxjs@7.8.1_reflect-metadata@0.2.2_rxjs@7.8.1",
+    "npm:@types/node@^22.10.7": "22.10.7"
   },
   "jsr": {
     "@hono/hono@4.6.17": {
@@ -23,6 +25,9 @@
       "dependencies": [
         "jsr:@std/internal"
       ]
+    },
+    "@std/async@1.0.9": {
+      "integrity": "c6472fd0623b3f3daae023cdf7ca5535e1b721dfbf376562c0c12b3fb4867f91"
     },
     "@std/data-structures@1.0.6": {
       "integrity": "76a7fd8080c66604c0496220a791860492ab21a04a63a969c0b9a0609bbbb760"
@@ -50,6 +55,7 @@
       "integrity": "9bdd4ac07cb13e7594ac30e90f6ceef7254ac83a9aeaa089be0008f33aab5cd4",
       "dependencies": [
         "jsr:@std/assert@^1.0.10",
+        "jsr:@std/async",
         "jsr:@std/data-structures",
         "jsr:@std/fs",
         "jsr:@std/internal",
@@ -97,6 +103,12 @@
         "consola"
       ]
     },
+    "@types/node@22.10.7": {
+      "integrity": "sha512-V09KvXxFiutGp6B7XkpaDXlNadZxrzajcY50EuoLIpQ6WWYCSvf19lVIazzfIzQvhUN2HjX12spLojTnhuKlGg==",
+      "dependencies": [
+        "undici-types"
+      ]
+    },
     "consola@3.4.0": {
       "integrity": "sha512-EiPU8G6dQG0GFHNR8ljnZFki/8a+cQwEQ+7wpxdChl02Q8HXlwEZWD5lqAF8vC2sEC3Tehr8hy7vErz88LHyUA=="
     },
@@ -129,6 +141,9 @@
       "dependencies": [
         "@lukeed/csprng"
       ]
+    },
+    "undici-types@6.20.0": {
+      "integrity": "sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg=="
     }
   },
   "workspace": {
@@ -142,7 +157,8 @@
       "dependencies": [
         "npm:@hono/node-server@^1.13.7",
         "npm:@nestjs/common@^11.0.1",
-        "npm:@nestjs/core@^11.0.1"
+        "npm:@nestjs/core@^11.0.1",
+        "npm:@types/node@^22.10.7"
       ]
     }
   }

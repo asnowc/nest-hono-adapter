@@ -15,8 +15,8 @@ import * as http from "node:http";
 import * as https from "node:https";
 import type { BlankEnv, BlankSchema } from "hono/types";
 import { NestHandler } from "./nest.ts";
-import { createHonoRes, createHonoReq, sendResult } from "./_util.ts";
-import type { HonoReq, HonoRes, HonoApplicationExtra, HonoBodyParser } from "./hono.impl.ts";
+import { createHonoRes, createHonoReq, sendResult, HonoReq, HonoRes } from "./_util.ts";
+import type { HonoApplicationExtra, HonoBodyParser } from "./hono.impl.ts";
 
 export type CORSOptions = NonNullable<Parameters<typeof cors>[0]>;
 
@@ -60,7 +60,7 @@ export class HonoAdapter<E extends Env = BlankEnv, S extends Schema = BlankSchem
         const parser = this.#bodyParsers.get(contentType);
         if (parser) body = await parser(ctx.req);
       }
-      await routeHandler(createHonoReq(ctx.req, body, undefined), createHonoRes(ctx), next);
+      await routeHandler(createHonoReq(ctx.req, body, ctx.req.param(), undefined), createHonoRes(ctx), next);
       return sendResult(ctx, nestHeaders);
     };
   }
@@ -187,14 +187,16 @@ export class HonoAdapter<E extends Env = BlankEnv, S extends Schema = BlankSchem
   //implement
   setErrorHandler(handler: ErrorHandler<HonoReq, HonoRes>) {
     this.instance.onError(async (err: Error, ctx: HonoContext) => {
-      await handler(err, createHonoReq(ctx.req, undefined, undefined), createHonoRes(ctx));
+      await handler(err, createHonoReq(ctx.req, {}, {}, undefined), createHonoRes(ctx));
       return sendResult(ctx, {});
     });
   }
   //implement
   setNotFoundHandler(handler: RequestHandler<HonoReq, HonoRes>) {
-    const honoHandler = this.createRouteHandler(handler);
-    this.instance.notFound(honoHandler);
+    this.instance.notFound(async (ctx: HonoContext) => {
+      await handler(createHonoReq(ctx.req, {}, {}, undefined), createHonoRes(ctx));
+      return sendResult(ctx, {});
+    });
   }
 
   //implement
