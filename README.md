@@ -37,18 +37,25 @@ const app = await NestFactory.create<NestHonoApplication>(
   AppModule,
   new HonoAdapter({
     initHttpServer({ hono, forceCloseConnections, httpsOptions }) {
-      return createAdaptorServer({
-        fetch: this.instance.fetch,
-        createServer: httpsOptions ? https.createServer : http.createServer,
-        overrideGlobalObjects: false,
-      });
+      if (httpsOptions) {
+        return createAdaptorServer({
+          fetch: hono.fetch,
+          createServer: https.createServer,
+          serverOptions: { key: httpsOptions.key, cert: httpsOptions.cert },
+        });
+      } else {
+        return createAdaptorServer({
+          fetch: hono.fetch,
+          createServer: http.createServer,
+        });
+      }
     },
-  })
+  }),
 );
 ```
 
-**Use Deno.serve()**
-Hono supports multiple platforms, and on Deno or Bun, there is no need to rely on `@hono/node-server`. Here is an example of using `Deno.serve()`
+**Use Deno.serve()** Hono supports multiple platforms, and on Deno or Bun, there is no need to rely on
+`@hono/node-server`. Here is an example of using `Deno.serve()`
 
 ```ts
 import { NestFactory } from "npm:@nestjs/core";
@@ -97,8 +104,8 @@ If any other type is returned, http responds with 500 "HonoAdapter cannot conver
 
 ### Custom parsing request bodies
 
-By default, `application/json`, `application/x-www-form-urlencoded`, `multipart/form-data` and `text/plain` are automatically resolved
-You can customize the parser, for example to parse the `application/custom` request body unmapped
+By default, `application/json`, `application/x-www-form-urlencoded`, `multipart/form-data` and `text/plain` are
+automatically resolved You can customize the parser, for example to parse the `application/custom` request body unmapped
 
 ```ts
 const app = await NestFactory.create<NestHonoApplication>(AppModule, adapter);
@@ -138,7 +145,8 @@ class ExampleController {
 }
 ```
 
-`res.send()` is signed send(response: Response). Because of nest's mechanism, when you use `@Res()` to get the response object, the function's return value is ignored
+`res.send()` is signed send(response: Response). Because of nest's mechanism, when you use `@Res()` to get the response
+object, the function's return value is ignored
 
 ### Unsupported decorators
 

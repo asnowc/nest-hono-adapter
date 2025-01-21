@@ -35,13 +35,20 @@ const app = await NestFactory.create<NestHonoApplication>(
   AppModule,
   new HonoAdapter({
     initHttpServer({ hono, forceCloseConnections, httpsOptions }) {
-      return createAdaptorServer({
-        fetch: this.instance.fetch,
-        createServer: httpsOptions ? https.createServer : http.createServer,
-        overrideGlobalObjects: false,
-      });
+      if (httpsOptions) {
+        return createAdaptorServer({
+          fetch: hono.fetch,
+          createServer: https.createServer,
+          serverOptions: { key: httpsOptions.key, cert: httpsOptions.cert },
+        });
+      } else {
+        return createAdaptorServer({
+          fetch: hono.fetch,
+          createServer: http.createServer,
+        });
+      }
     },
-  })
+  }),
 );
 ```
 
