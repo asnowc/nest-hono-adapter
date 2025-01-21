@@ -1,11 +1,11 @@
 import type { Context, Env, Hono, HonoRequest, Next, Schema } from "hono";
-import { serveStatic } from "hono/deno";
+
 import type { ServeStaticOptions } from "hono/serve-static";
 import { bodyLimit as bodyLimitMid } from "hono/body-limit";
 import { cors } from "hono/cors";
 import type { RedirectStatusCode, StatusCode } from "hono/utils/http-status";
 
-import { Logger, RequestMethod } from "@nestjs/common";
+import { RequestMethod } from "@nestjs/common";
 import type { ErrorHandler, RequestHandler } from "@nestjs/common/interfaces";
 import { AbstractHttpAdapter } from "@nestjs/core/adapters/http-adapter.js";
 
@@ -121,14 +121,12 @@ export abstract class HonoRouterAdapter
   }
 
   //implement
-  useStaticAssets(path: string, options: ServeStaticOptions) {
-    Logger.log("Registering static assets middleware");
-    this.instance.use(path, serveStatic(options));
-    return this;
+  useStaticAssets(path: string, options: ServeStaticOptions): never {
+    throw new Error("Method useStaticAssets not implemented."); //TODO useStaticAssets
   }
   //implement
-  setViewEngine(options: any | string): this {
-    throw new Error("Method not implemented."); //TODO setViewEngine
+  setViewEngine(options: any | string): never {
+    throw new Error("Method setViewEngine not implemented."); //TODO setViewEngine
   }
   //implement
   getRequestHostname(request: InternalHonoReq): string {
