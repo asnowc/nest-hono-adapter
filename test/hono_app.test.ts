@@ -1,12 +1,20 @@
-import { createNestHono } from "./__mocks__/create.ts";
-import { GetParamModule } from "./modules/get_param.module.ts";
 import { HonoAdapter, NestHonoApplication } from "nest-hono-adapter";
 import { NestFactory } from "@nestjs/core";
-import { AppModule } from "./modules/hello_word.module.ts";
 import { assertEquals, assertNotEquals } from "@std/assert";
 
 import { Hono } from "hono";
 import { Server } from "node:http";
+
+import { Controller, Get, Module } from "@nestjs/common";
+@Controller()
+class TestController {
+  @Get("hi")
+  method() {
+    return "hello word";
+  }
+}
+@Module({ controllers: [TestController] })
+class AppModule {}
 
 Deno.test("listen fake http server", async function () {
   const hono = new Hono();
@@ -66,14 +74,10 @@ Deno.test("Deno.serve", async () => {
 
 //TODO
 Deno.test("use", { ignore: true }, async () => {
-  const { adapter, app, hono } = await createNestHono(GetParamModule);
 });
 Deno.test("enableCros", { ignore: true }, async () => {
-  const { adapter, app, hono } = await createNestHono(GetParamModule);
 });
 Deno.test("useBodyParser", { ignore: true }, async () => {
-  const { adapter, app, hono } = await createNestHono(GetParamModule);
 });
 Deno.test("useWebSocketAdapter", { ignore: true }, async () => {
-  const { adapter, app, hono } = await createNestHono(GetParamModule);
 });
