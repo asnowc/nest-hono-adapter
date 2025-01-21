@@ -4,7 +4,7 @@
 
 ### 使用
 
-`npm install @nestjs/core @nestjs/common nest-hono-adapter hono/node-server`
+`npm install @nestjs/core @nestjs/common nest-hono-adapter @hono/node-server`
 
 **使用 FakeHttpServer 附加到已存在的 Hono 实例**
 
@@ -29,7 +29,7 @@ const response = await hono.request("/hi");
 import { NestFactory } from "@nestjs/core";
 import { Module } from "@nestjs/common";
 import { HonoAdapter, NestHonoApplication } from "nest-hono-adapter";
-import { createAdaptorServer } from "hono/node-server";
+import { createAdaptorServer } from "@hono/node-server";
 
 const app = await NestFactory.create<NestHonoApplication>(
   AppModule,
@@ -47,7 +47,7 @@ const app = await NestFactory.create<NestHonoApplication>(
 
 **使用 Deno.serve()**
 
-Hono 是支持多平台的，在 Deno 或 Bun 上，无需依赖 `hono/node-server`, 下面是使用 `Deno.serve()` 的示例
+Hono 是支持多平台的，在 Deno 或 Bun 上，无需依赖 `@hono/node-server`, 下面是使用 `Deno.serve()` 的示例
 
 ```ts
 import { NestFactory } from "npm:@nestjs/core";

@@ -6,7 +6,7 @@
 
 ### Usage
 
-`npm install @nestjs/core @nestjs/common nest-hono-adapter hono/node-server`
+`npm install @nestjs/core @nestjs/common nest-hono-adapter @hono/node-server`
 
 **Attach FakeHttpServer to an existing Hono instance**
 
@@ -31,7 +31,7 @@ const response = await hono.request("/hi");
 import { NestFactory } from "@nestjs/core";
 import { Module } from "@nestjs/common";
 import { HonoAdapter, NestHonoApplication } from "nest-hono-adapter";
-import { createAdaptorServer } from "hono/node-server";
+import { createAdaptorServer } from "@hono/node-server";
 
 const app = await NestFactory.create<NestHonoApplication>(
   AppModule,
@@ -48,7 +48,7 @@ const app = await NestFactory.create<NestHonoApplication>(
 ```
 
 **Use Deno.serve()**
-Hono supports multiple platforms, and on Deno or Bun, there is no need to rely on `hono/node-server`. Here is an example of using `Deno.serve()`
+Hono supports multiple platforms, and on Deno or Bun, there is no need to rely on `@hono/node-server`. Here is an example of using `Deno.serve()`
 
 ```ts
 import { NestFactory } from "npm:@nestjs/core";
