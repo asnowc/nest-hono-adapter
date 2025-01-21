@@ -76,48 +76,30 @@ export function createHonoRes(context: Context): InternalHonoRes {
 }
 export function sendResult(ctx: Context, headers: Record<string, string>) {
   const body = Reflect.get(ctx, NEST_BODY);
-  if (body instanceof Response) {
-    Object.entries(headers).forEach(([key, value]) => body.headers.set(key, value));
-    return body;
-  }
-
-  let responseContentType = headers["content-type"];
-
-  if (responseContentType) {
-    const i = responseContentType.indexOf(";");
-    if (i > 0) responseContentType = responseContentType.slice(0, i);
-    switch (responseContentType) {
-      case "application/json":
-        return ctx.json(body, undefined, headers);
-      case "text/plain":
-        return ctx.text(body, undefined, headers);
-      case "text/html":
-        return ctx.html(body, undefined, headers);
-      default:
-        return ctx.body(body, undefined, headers);
+  let response: Response;
+  switch (typeof body) {
+    case "string": {
+      response = ctx.text(body, undefined, headers);
+      break;
     }
-  } else {
-    switch (typeof body) {
-      case "string":
-        return ctx.text(body, undefined, headers);
-      case "object": {
-        if (body instanceof ReadableStream || body instanceof ArrayBuffer) {
-          return ctx.body(body, undefined, headers);
-        } else if (body instanceof Uint8Array) {
-          return ctx.body(ReadableStream.from([body]), undefined, headers);
-        } else if (body instanceof Blob) {
-          return ctx.body(body.stream(), undefined, headers);
-        } else {
-          return ctx.json(body, undefined, headers);
-        }
-      }
-      case "undefined": {
-        return ctx.body(null, undefined, headers);
-      }
-      default:
-        return ctx.text("HonoAdapter cannot convert unknown types", 500, headers);
+    case "object": {
+      if (body === null) response = ctx.body(null);
+      else if (body instanceof Response) response = body;
+      else if (body instanceof ReadableStream) response = ctx.body(body);
+      else if (body instanceof Uint8Array) response = ctx.body(ReadableStream.from([body]));
+      else if (body instanceof Blob) response = ctx.body(body.stream());
+      else response = ctx.json(body);
+      break;
     }
+    case "undefined": {
+      response = ctx.body(null);
+      break;
+    }
+    default:
+      return ctx.text("HonoAdapter cannot convert unknown types", 500, headers);
   }
+  Object.entries(headers).forEach(([key, value]) => response.headers.set(key, value));
+  return response;
 }
 
 export type InternalHonoReq = NestReqRequired & HonoRequest;

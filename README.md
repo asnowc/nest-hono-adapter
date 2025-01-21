@@ -88,15 +88,15 @@ class Test {
 }
 ```
 
-| type                       | content-type     |
-| -------------------------- | ---------------- |
-| string                     | text/plain       |
-| object                     | application/json |
-| Uint8Array                 | none             |
-| Blob                       | none             |
-| ReadableStream<Uint8Array> | none             |
-| undefined                  | none             |
-| null                       | none             |
+| type                       | content-type     | parser |
+| -------------------------- | ---------------- | ------ |
+| string                     | text/plain       | text   |
+| object                     | application/json | json   |
+| Uint8Array                 | none             | binary |
+| Blob                       | none             | binary |
+| ReadableStream<Uint8Array> | none             | binary |
+| undefined                  | none             | null   |
+| null                       | none             | null   |
 
 (none says not set)
 

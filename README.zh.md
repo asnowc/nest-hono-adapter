@@ -75,7 +75,7 @@ await app.listen(3000, "127.0.0.1");
 
 ### 自动推断 content-type
 
-如果未设定请求头，默认情况下，将根据返回的数据类型推断 `content-type`
+如果未设定请求头，默认情况下，将根据返回的数据类型推断 `content-type`。
 
 ```ts
 @Controller()
@@ -87,15 +87,15 @@ class Test {
 }
 ```
 
-| 类型                       | content-type     |
-| -------------------------- | ---------------- |
-| string                     | text/plain       |
-| object                     | application/json |
-| Uint8Array                 | none             |
-| Blob                       | none             |
-| ReadableStream<Uint8Array> | none             |
-| undefined                  | none             |
-| null                       | none             |
+| type                       | content-type     | parser |
+| -------------------------- | ---------------- | ------ |
+| string                     | text/plain       | text   |
+| object                     | application/json | json   |
+| Uint8Array                 | none             | binary |
+| Blob                       | none             | binary |
+| ReadableStream<Uint8Array> | none             | binary |
+| undefined                  | none             | null   |
+| null                       | none             | null   |
 
 (none 表示不设定)
 
