@@ -1,5 +1,5 @@
 import { NestFactory } from "@nestjs/core";
-import { HonoAdapter, NestHonoApplication } from "@asla/nest-hono-adapter";
+import { HonoAdapter, NestHonoApplication } from "nest-hono-adapter";
 
 export async function createNestHono(AppModule: new (...args: any[]) => any) {
   const adapter = new HonoAdapter();

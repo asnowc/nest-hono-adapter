@@ -9,7 +9,7 @@ import { NestFactory } from "@nestjs/core";
 import { Module } from "@nestjs/common";
 import { HonoAdapter, NestHonoApplication } from "nest-hono-adapter";
 
-const app = await NestFactory.create<NestExpressApplication>(AppModule, new HonoAdapter());
+const app = await NestFactory.create<NestHonoApplication>(AppModule, new HonoAdapter());
 
 await app.listen(3000, "0.0.0.0");
 ```
@@ -48,7 +48,7 @@ By default, `application/json`, `application/x-www-form-urlencoded`, `multipart/
 You can customize the parser, for example to parse the `application/custom` request body unmapped
 
 ```ts
-const app = await NestFactory.create<NestExpressApplication>(AppModule, adapter);
+const app = await NestFactory.create<NestHonoApplication>(AppModule, adapter);
 app.useBodyParser("application/custom", async (honoRequest) => {
   const json = await honoRequest.json();
   return new Map(json);
@@ -67,6 +67,9 @@ class Test {
 ### Gets the request and response objects
 
 ```ts
+import type { HonoResponse } from "nest-hono-adapter";
+import type { HonoRequest } from "hono";
+
 @Controller()
 class ExampleController {
   @Get("req")

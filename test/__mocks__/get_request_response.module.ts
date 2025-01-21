@@ -1,5 +1,5 @@
 import { Module, Controller, Get, Res, Req } from "@nestjs/common";
-import type { HonoResponse } from "@asla/nest-hono-adapter";
+import type { HonoResponse } from "nest-hono-adapter";
 import type { HonoRequest } from "hono";
 
 @Controller()

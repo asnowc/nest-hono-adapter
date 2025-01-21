@@ -1,9 +1,8 @@
-import type * as honoReq from "hono/request";
+import type { HonoRequest } from "hono/request";
 import type { ServeStaticOptions } from "hono/serve-static";
-import type { HonoRes } from "./_util.ts";
 
-export type HonoRequest = honoReq.HonoRequest;
-export type HonoResponse = HonoRes;
+export type { HonoRes as HonoResponse } from "./_util.ts";
+export type { HonoRequest } from "hono/request";
 
 export interface HonoApplicationExtra {
   useBodyParser(contentType: string, parser: HonoBodyParser): void;
