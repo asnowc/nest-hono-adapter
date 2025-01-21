@@ -1,5 +1,3 @@
-import { createAdaptorServer, ServerType } from "@hono/node-server";
-
 import { Context, Next, Hono, HonoRequest, Env, Schema } from "hono";
 import { serveStatic } from "hono/deno";
 import type { ServeStaticOptions } from "hono/serve-static";
@@ -10,12 +8,19 @@ import type { RedirectStatusCode, StatusCode } from "hono/utils/http-status";
 import { Logger, RequestMethod } from "@nestjs/common";
 import type { ErrorHandler, NestApplicationOptions, RequestHandler } from "@nestjs/common/interfaces";
 import { AbstractHttpAdapter } from "@nestjs/core/adapters/http-adapter.js";
-import * as http from "node:http";
+import type { Server as NodeHttpServer } from "node:http";
 
-import * as https from "node:https";
 import type { BlankEnv, BlankSchema } from "hono/types";
-import type { NestHandler } from "./nest.ts";
-import { createHonoRes, createHonoReq, sendResult, HonoReq, HonoRes } from "./_util.ts";
+import type { NestHandler, NestHttpServerRequired } from "./nest.ts";
+import {
+  createHonoRes,
+  createHonoReq,
+  sendResult,
+  InternalHonoReq,
+  InternalHonoRes,
+  createNestRequiredHttpServer,
+  isFakeHttpServer,
+} from "./_util.ts";
 import type { HonoApplicationExtra, HonoBodyParser } from "./hono.impl.ts";
 import type { CorsOptions, CorsOptionsDelegate } from "@nestjs/common/interfaces/external/cors-options.interface.js";
 
@@ -23,33 +28,58 @@ export type CORSOptions = Partial<NonNullable<Parameters<typeof cors>[0]>>;
 
 const NEST_HEADERS = Symbol("nest_headers");
 
-type NestHonoHandler = NestHandler<HonoReq, HonoRes>;
+type NestHonoHandler = NestHandler<InternalHonoReq, InternalHonoRes>;
 
 export interface HonoAdapter<E extends Env = BlankEnv, S extends Schema = BlankSchema, BasePath extends string = "/">
-  extends AbstractHttpAdapter<ServerType, HonoReq, HonoRes> {
+  extends AbstractHttpAdapter<NestHttpServerRequired, InternalHonoReq, InternalHonoRes> {
   getInstance(): Hono<E, S, BasePath>;
   getInstance<T = any>(): T;
 }
-
+export interface CreateHonoAdapterOption {
+  /** 初始化服务器时调用 */
+  initHttpServer?(
+    option: Pick<NestApplicationOptions, "httpsOptions" | "forceCloseConnections">
+  ): NestHttpServerRequired;
+  /** 获取 Http Server 监听的地址信息 */
+  getAddress?: () => ReturnType<NodeHttpServer["address"]>;
+  /** 关闭服务器时调用 */
+  close?: () => Promise<void>;
+  /** 自定义 Hono 实例 */
+  hono?: Hono;
+}
 /**
  * Adapter for using Hono with NestJS.
  */
-export class HonoAdapter<E extends Env = BlankEnv, S extends Schema = BlankSchema, BasePath extends string = "/">
-  extends AbstractHttpAdapter<ServerType, HonoReq, HonoRes>
+export class HonoAdapter
+  extends AbstractHttpAdapter<NestHttpServerRequired, InternalHonoReq, InternalHonoRes>
   implements HonoApplicationExtra
 {
-  protected declare readonly instance: Hono<E, S, BasePath>;
-  protected declare httpServer: ServerType;
-  constructor(hono: Hono<E, S, BasePath> = new Hono<E, S, BasePath>()) {
+  protected declare readonly instance: Hono;
+  protected declare httpServer: NestHttpServerRequired;
+  #honoAdapterOption: CreateHonoAdapterOption;
+  constructor(option: CreateHonoAdapterOption = {}) {
+    const { hono = new Hono(), ...reset } = option;
     super(hono);
+    this.#honoAdapterOption = reset;
   }
-  override listen(port: string | number, callback?: () => void): any;
-  override listen(port: string | number, hostname: string, callback?: () => void): any;
-  override listen(port: string | number, ...args: any[]): ServerType {
-    port = +port;
-    return this.httpServer.listen(port, ...args);
-  }
+  override listen(port: string | number, callback?: () => void): void;
+  override listen(port: string | number, hostname: string, callback?: () => void): void;
+  override listen(port: string | number, ...args: any[]): void {
+    let callback = args[args.length - 1];
+    if (typeof callback !== "function") callback = undefined;
 
+    if (isFakeHttpServer(this.httpServer)) {
+      this.httpServer.address = this.#honoAdapterOption.getAddress ?? (() => "127.0.0.1");
+      callback?.();
+    } else {
+      try {
+        port = +port;
+        return this.httpServer.listen!(port, ...args);
+      } catch (error) {
+        callback?.(error);
+      }
+    }
+  }
   private createRouteHandler(routeHandler: NestHonoHandler) {
     return async (ctx: Context, next?: Next): Promise<Response> => {
       const nestHeaders: Record<string, string> = {};
@@ -121,22 +151,30 @@ export class HonoAdapter<E extends Env = BlankEnv, S extends Schema = BlankSchem
   }
 
   #bodyParsers: Map<string | undefined, HonoBodyParser> = new Map();
-  useBodyParser(contentType: string, parser: HonoBodyParser) {
+  useBodyParser(contentType: string, parser: HonoBodyParser): void;
+  /**
+   * @param rawBody When NestApplicationOptions.bodyParser is set to true, rawBody will be true
+   */
+  useBodyParser(contentType: string, rawBody?: boolean | HonoBodyParser, parser?: HonoBodyParser) {
+    if (typeof rawBody === "function") {
+      parser = rawBody;
+    } else if (typeof parser !== "function") {
+      return;
+    }
     this.#bodyParsers.set(contentType, parser);
   }
   //implement
-  close(): Promise<void> {
-    return new Promise((resolve) => this.httpServer.close(() => resolve()));
+  async close(): Promise<void> {
+    if (isFakeHttpServer(this.httpServer)) return this.#honoAdapterOption.close?.();
+    return new Promise((resolve, reject) => {
+      return this.httpServer.close!((err) => (err ? reject(err) : resolve()));
+    });
   }
   //implement
-  initHttpServer(options: NestApplicationOptions) {
-    const isHttpsEnabled = options?.httpsOptions;
-    const createServer = isHttpsEnabled ? https.createServer : http.createServer;
-    this.httpServer = createAdaptorServer({
-      fetch: this.instance.fetch,
-      createServer,
-      overrideGlobalObjects: false,
-    });
+  initHttpServer(options: NestApplicationOptions = {}) {
+    const { forceCloseConnections, httpsOptions } = options;
+    const httpServer = this.#honoAdapterOption.initHttpServer?.({ forceCloseConnections, httpsOptions });
+    this.httpServer = httpServer ?? createNestRequiredHttpServer();
   }
   //implement
   useStaticAssets(path: string, options: ServeStaticOptions) {
@@ -149,7 +187,7 @@ export class HonoAdapter<E extends Env = BlankEnv, S extends Schema = BlankSchem
     throw new Error("Method not implemented."); //TODO setViewEngine
   }
   //implement
-  getRequestHostname(request: HonoReq): string {
+  getRequestHostname(request: InternalHonoReq): string {
     return request.header("Host") ?? "";
   }
   //implement
@@ -161,14 +199,14 @@ export class HonoAdapter<E extends Env = BlankEnv, S extends Schema = BlankSchem
     return request.url;
   }
   // implement
-  status(res: HonoRes, statusCode: StatusCode) {
+  status(res: InternalHonoRes, statusCode: StatusCode) {
     res.status(statusCode);
   }
   //implement
   /**
    * 回复数据
    */
-  reply(res: HonoRes, body: any, statusCode?: StatusCode) {
+  reply(res: InternalHonoRes, body: any, statusCode?: StatusCode) {
     if (statusCode) res.status(statusCode);
     res.send(body);
   }
@@ -176,27 +214,27 @@ export class HonoAdapter<E extends Env = BlankEnv, S extends Schema = BlankSchem
    * implement
    * 没有响应数据时，用于结束http响应
    */
-  end(res: HonoRes, message?: string) {
+  end(res: InternalHonoRes, message?: string) {
     res.send(message ?? null);
   }
   //implement
-  render(res: HonoRes, view: string | Promise<string>, options: any) {
+  render(res: InternalHonoRes, view: string | Promise<string>, options: any) {
     res.send(res.render(view));
   }
 
   //implement
-  redirect(res: HonoRes, statusCode: RedirectStatusCode, url: string) {
+  redirect(res: InternalHonoRes, statusCode: RedirectStatusCode, url: string) {
     res.send(res.redirect(url, statusCode));
   }
   //implement
-  setErrorHandler(handler: ErrorHandler<HonoReq, HonoRes>) {
+  setErrorHandler(handler: ErrorHandler<InternalHonoReq, InternalHonoRes>) {
     this.instance.onError(async (err: Error, ctx: Context) => {
       await handler(err, createHonoReq(ctx, { body: {}, params: {}, rawBody: undefined }), createHonoRes(ctx));
       return sendResult(ctx, {});
     });
   }
   //implement
-  setNotFoundHandler(handler: RequestHandler<HonoReq, HonoRes>) {
+  setNotFoundHandler(handler: RequestHandler<InternalHonoReq, InternalHonoRes>) {
     this.instance.notFound(async (ctx: Context) => {
       await handler(createHonoReq(ctx, { body: {}, params: {}, rawBody: undefined }), createHonoRes(ctx));
       return sendResult(ctx, {});
@@ -204,11 +242,11 @@ export class HonoAdapter<E extends Env = BlankEnv, S extends Schema = BlankSchem
   }
 
   //implement
-  isHeadersSent(res: HonoRes): boolean {
+  isHeadersSent(res: InternalHonoRes): boolean {
     return res.finalized;
   }
   //implement
-  setHeader(res: HonoRes, name: string, value: string) {
+  setHeader(res: InternalHonoRes, name: string, value: string) {
     Reflect.get(res, NEST_HEADERS)[name] = value.toLowerCase();
   }
 
@@ -303,7 +341,7 @@ function getRouteAndHandler(
   }
   return [path, handler];
 }
-function transformsNestCrosOption(options: CorsOptions | CorsOptionsDelegate<HonoReq> = {}): CORSOptions {
+function transformsNestCrosOption(options: CorsOptions | CorsOptionsDelegate<InternalHonoReq> = {}): CORSOptions {
   if (typeof options === "function") throw new Error("options must be an object");
   let { origin } = options;
   if (typeof origin === "function") origin = undefined; //TODO

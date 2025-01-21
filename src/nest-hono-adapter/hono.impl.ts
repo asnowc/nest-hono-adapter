@@ -1,7 +1,7 @@
 import type { HonoRequest } from "hono/request";
 import type { ServeStaticOptions } from "hono/serve-static";
 
-export type { HonoRes as HonoResponse } from "./_util.ts";
+export type { InternalHonoRes as HonoResponse } from "./_util.ts";
 export type { HonoRequest } from "hono/request";
 
 export interface HonoApplicationExtra {

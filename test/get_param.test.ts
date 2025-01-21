@@ -1,6 +1,6 @@
 import { createNestHono } from "./__mocks__/create.ts";
 import { expect } from "@std/expect";
-import { GetParamModule } from "./__mocks__/get_param.module.ts";
+import { GetParamModule } from "./modules/get_param.module.ts";
 import { assertEquals } from "@std/assert";
 
 const app = await createNestHono(GetParamModule);

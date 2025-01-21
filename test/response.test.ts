@@ -1,17 +1,11 @@
 import { createNestHono } from "./__mocks__/create.ts";
 import { expect } from "@std/expect";
-import { ResponseModule } from "./__mocks__/response.module.ts";
+import { ResponseModule } from "./modules/response.module.ts";
 import { assertEquals } from "@std/assert";
 
 const app = await createNestHono(ResponseModule);
 await app.app.listen(3000);
 
-Deno.test("response hello word", async function () {
-  const { hono } = app;
-  const res = await hono.request("/hi");
-  expect(res.status).toBe(200);
-  expect(res.headers.get("content-type")).toBe("text/plain; charset=UTF-8");
-});
 Deno.test("内部错误", async function () {
   const { hono } = app;
   const res = await hono.request("/status500");

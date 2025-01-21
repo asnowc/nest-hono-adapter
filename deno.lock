@@ -10,7 +10,6 @@
     "jsr:@std/internal@^1.0.5": "1.0.5",
     "jsr:@std/path@^1.0.8": "1.0.8",
     "jsr:@std/testing@^1.0.9": "1.0.9",
-    "npm:@hono/node-server@^1.13.7": "1.13.7_hono@4.6.17",
     "npm:@nestjs/common@^10.4.15": "10.4.15_reflect-metadata@0.2.2_rxjs@7.8.1",
     "npm:@nestjs/core@^10.4.15": "10.4.15_@nestjs+common@10.4.15__reflect-metadata@0.2.2__rxjs@7.8.1_reflect-metadata@0.2.2_rxjs@7.8.1",
     "npm:@types/node@^22.10.7": "22.10.7",
@@ -61,12 +60,6 @@
     }
   },
   "npm": {
-    "@hono/node-server@1.13.7_hono@4.6.17": {
-      "integrity": "sha512-kTfUMsoloVKtRA2fLiGSd9qBddmru9KadNyhJCwgKBxTiNkaAJEwkVN9KV/rS4HtmmNRtUh6P+YpmjRMl0d9vQ==",
-      "dependencies": [
-        "hono"
-      ]
-    },
     "@lukeed/csprng@1.1.0": {
       "integrity": "sha512-Z7C/xXCiGWsg0KuKsHTKJxbWhpI3Vs5GwLfOean7MGyVFGqdRgBbAjOCh6u4bbjPc/8MJ2pZmK/0DLdCbivLDA=="
     },
@@ -206,7 +199,6 @@
     ],
     "packageJson": {
       "dependencies": [
-        "npm:@hono/node-server@^1.13.7",
         "npm:@types/node@^22.10.7"
       ]
     }

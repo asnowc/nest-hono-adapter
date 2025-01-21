@@ -1,9 +1,9 @@
 import { NestFactory } from "@nestjs/core";
 import { ExpressAdapter, NestExpressApplication } from "@nestjs/platform-express";
 import { Module } from "@nestjs/common";
-import { GetParamModule } from "../__mocks__/get_param.module.ts";
-import { OnlyGetReqAndResModule } from "../__mocks__/get_request_response.module.ts";
-import { ResponseModule } from "../__mocks__/response.module.ts";
+import { GetParamModule } from "../modules/get_param.module.ts";
+import { OnlyGetReqAndResModule } from "../modules/get_request_response.module.ts";
+import { ResponseModule } from "../modules/response.module.ts";
 
 @Module({
   imports: [GetParamModule, OnlyGetReqAndResModule, ResponseModule],

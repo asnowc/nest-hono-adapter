@@ -1,5 +1,5 @@
 import type { HonoRequest } from "hono/request";
-import type { NestReq } from "./nest.ts";
+import type { NestHttpServerRequired, NestReqRequired } from "./nest.ts";
 import type { Context } from "hono";
 import { getConnInfo } from "hono/cloudflare-workers";
 
@@ -10,12 +10,12 @@ export function createHonoReq(
     params: Record<string, string>;
     rawBody: any;
   }
-): HonoReq {
+): InternalHonoReq {
   const { body, params, rawBody } = info;
-  const honoReq = ctx.req as HonoReq;
+  const honoReq = ctx.req as InternalHonoReq;
   ctx.req.queries();
   ctx.req.query();
-  const nestReq: Omit<NestReq, "headers" | "query" | "ip"> = {
+  const nestReq: Omit<NestReqRequired, "headers" | "query" | "ip"> = {
     rawBody,
     body,
     session: ctx.get("session") ?? {},
@@ -68,11 +68,11 @@ function mountResponse(ctx: Context, data: any) {
   Reflect.set(ctx, NEST_BODY, data);
 }
 
-export function createHonoRes(context: Context): HonoRes {
+export function createHonoRes(context: Context): InternalHonoRes {
   Reflect.set(context, "send", function (this: Context, response: any = this.newResponse(null)) {
     mountResponse(this, response);
   });
-  return context as any as HonoRes;
+  return context as any as InternalHonoRes;
 }
 export function sendResult(ctx: Context, headers: Record<string, string>) {
   const body = Reflect.get(ctx, NEST_BODY);
@@ -120,10 +120,47 @@ export function sendResult(ctx: Context, headers: Record<string, string>) {
   }
 }
 
-export type HonoReq = NestReq & HonoRequest;
+export type InternalHonoReq = NestReqRequired & HonoRequest;
 
-export type HonoRes = Omit<Context, "req"> & {
+export type InternalHonoRes = Omit<Context, "req"> & {
   send(data?: any): void;
 };
 
 const NEST_BODY = Symbol("nest_body");
+const FakeHttpServer = Symbol("Fake HTTP Server");
+
+export function isFakeHttpServer(server: any) {
+  return Reflect.get(server, FakeHttpServer);
+}
+export function createNestRequiredHttpServer(): NestHttpServerRequired {
+  return new Proxy(
+    {
+      once() {
+        return this;
+      },
+      removeListener() {
+        return this;
+      },
+      address() {
+        return null;
+      },
+      then: undefined,
+      [FakeHttpServer]: true,
+    },
+    {
+      get(target, key) {
+        if (typeof key === "symbol" || Object.hasOwn(target, key)) {
+          //@ts-ignore
+          return target[key];
+        }
+        console.trace("Nest Adapter: Nest uses undefined httpServer property", key);
+        const value = function () {
+          throw new Error(`Nest call undefined httpServer property '${String(key)}'`);
+        };
+        //@ts-ignore
+        target[key] = value;
+        return value;
+      },
+    }
+  );
+}

@@ -1,6 +1,6 @@
 import { createNestHono } from "./__mocks__/create.ts";
 import { expect } from "@std/expect";
-import { OnlyGetReqAndResModule } from "./__mocks__/get_request_response.module.ts";
+import { OnlyGetReqAndResModule } from "./modules/get_request_response.module.ts";
 import { assertEquals } from "@std/assert";
 
 const app = await createNestHono(OnlyGetReqAndResModule);
