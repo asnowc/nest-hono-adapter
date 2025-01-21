@@ -3,7 +3,7 @@ import { HonoAdapter, NestHonoApplication } from "nest-hono-adapter";
 
 export async function createNestHono(AppModule: new (...args: any[]) => any) {
   const adapter = new HonoAdapter();
-  const app = await NestFactory.create<NestHonoApplication>(AppModule, adapter);
+  const app = await NestFactory.create<NestHonoApplication>(AppModule, adapter, { logger: false });
   await app.listen(3000);
   return {
     app,

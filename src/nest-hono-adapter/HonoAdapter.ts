@@ -34,6 +34,8 @@ export class HonoAdapter extends HonoRouterAdapter {
   override listen(port: string | number, callback?: () => void): void;
   override listen(port: string | number, hostname: string, callback?: () => void): void;
   override async listen(port: string | number, ...args: any[]): Promise<void> {
+    port = +port;
+
     let callback = args[args.length - 1];
     if (typeof callback !== "function") callback = undefined;
     const config = this.#honoAdapterConfig;
@@ -66,10 +68,12 @@ export class HonoAdapter extends HonoRouterAdapter {
   }
   //implement
   async close(): Promise<void> {
-    if (isFakeHttpServer(this.httpServer)) return this.#honoAdapterConfig.close?.();
-    return new Promise((resolve, reject) => {
-      return this.httpServer.close!((err) => (err ? reject(err) : resolve()));
-    });
+    if (!isFakeHttpServer(this.httpServer) && this.httpServer.close) {
+      await new Promise<void>((resolve, reject) => {
+        return this.httpServer.close!((err) => (err ? reject(err) : resolve()));
+      });
+    }
+    return this.#honoAdapterConfig.close?.();
   }
   #initHttServerOption?: Omit<InitHttpServerConfig, "hono">;
   //implement

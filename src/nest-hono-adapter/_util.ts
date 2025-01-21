@@ -79,7 +79,7 @@ export function sendResult(ctx: Context, headers: Record<string, string>) {
   let response: Response;
   switch (typeof body) {
     case "string": {
-      response = ctx.text(body, undefined, headers);
+      response = ctx.text(body);
       break;
     }
     case "object": {
@@ -96,7 +96,7 @@ export function sendResult(ctx: Context, headers: Record<string, string>) {
       break;
     }
     default:
-      return ctx.text("HonoAdapter cannot convert unknown types", 500, headers);
+      return ctx.text("HonoAdapter cannot convert unknown types", 500);
   }
   Object.entries(headers).forEach(([key, value]) => response.headers.set(key, value));
   return response;

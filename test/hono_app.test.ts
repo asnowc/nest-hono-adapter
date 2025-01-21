@@ -18,7 +18,7 @@ class AppModule {}
 
 Deno.test("listen fake http server", async function () {
   const hono = new Hono();
-  const app = await NestFactory.create<NestHonoApplication>(AppModule, new HonoAdapter({ hono }));
+  const app = await NestFactory.create<NestHonoApplication>(AppModule, new HonoAdapter({ hono }), { logger: false });
 
   await app.listen(3000, "127.0.0.1");
   const res = await hono.request("/hi");
@@ -34,13 +34,8 @@ Deno.test("custom http server", async () => {
     initHttpServer({ forceCloseConnections, httpsOptions }) {
       return server;
     },
-    close() {
-      return new Promise((resolve, reject) => {
-        server.close((err) => (err ? reject(err) : resolve()));
-      });
-    },
   });
-  const app = await NestFactory.create<NestHonoApplication>(AppModule, adapter);
+  const app = await NestFactory.create<NestHonoApplication>(AppModule, adapter, { logger: false });
   try {
     await app.listen(3000, "127.0.0.1");
     assertEquals(server.listening, true, "http server is listening");
@@ -60,7 +55,7 @@ Deno.test("Deno.serve", async () => {
       serve = await Deno.serve({ port, hostname, key: httpsOptions.key, cert: httpsOptions.cert }, hono.fetch);
     },
   });
-  const app = await NestFactory.create<NestHonoApplication>(AppModule, adapter);
+  const app = await NestFactory.create<NestHonoApplication>(AppModule, adapter, { logger: false });
   try {
     await app.listen(3000, "127.0.0.1");
     assertNotEquals(serve!, undefined);
