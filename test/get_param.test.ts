@@ -5,7 +5,6 @@ import { assertEquals } from "@std/assert";
 
 const app = await createNestHono(GetParamModule);
 await app.app.listen(3000);
-
 Deno.test("使用 @Query() 获取参数", async function () {
   const { hono } = app;
   const res = await hono.request("/query?abc=aa");

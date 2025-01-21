@@ -2,16 +2,69 @@
 
 **Required Nest >=10**
 
+[[中文文档]](./README.zh.md)
+
 ### Usage
+
+`npm install @nestjs/core @nestjs/common nest-hono-adapter hono/node-server`
+
+**Attach FakeHttpServer to an existing Hono instance**
 
 ```ts
 import { NestFactory } from "@nestjs/core";
 import { Module } from "@nestjs/common";
 import { HonoAdapter, NestHonoApplication } from "nest-hono-adapter";
 
-const app = await NestFactory.create<NestHonoApplication>(AppModule, new HonoAdapter());
+const hono = new Hono();
 
-await app.listen(3000, "0.0.0.0");
+const app = await NestFactory.create<NestHonoApplication>(AppModule, new HonoAdapter({ hono }));
+await app.listen(3000, "0.0.0.0"); // This won't really listen for '0.0.0.0', HonoAdapter will create a FakeHttpServer because Nest depends on it
+
+app.getUrl(); //FakeHttpServer will return '127.0.0.1' unless the address parameter was passed when creating the HonoAdapter
+
+const response = await hono.request("/hi");
+```
+
+**Or use a real HttpServer**
+
+```ts
+import { NestFactory } from "@nestjs/core";
+import { Module } from "@nestjs/common";
+import { HonoAdapter, NestHonoApplication } from "nest-hono-adapter";
+import { createAdaptorServer } from "hono/node-server";
+
+const app = await NestFactory.create<NestHonoApplication>(
+  AppModule,
+  new HonoAdapter({
+    initHttpServer({ hono, forceCloseConnections, httpsOptions }) {
+      return createAdaptorServer({
+        fetch: this.instance.fetch,
+        createServer: httpsOptions ? https.createServer : http.createServer,
+        overrideGlobalObjects: false,
+      });
+    },
+  })
+);
+```
+
+**Use Deno.serve()**
+Hono supports multiple platforms, and on Deno or Bun, there is no need to rely on `hono/node-server`. Here is an example of using `Deno.serve()`
+
+```ts
+import { NestFactory } from "npm:@nestjs/core";
+import { Module } from "npm:@nestjs/common";
+import { HonoAdapter, NestHonoApplication } from "npm:nest-hono-adapter";
+
+let serve: Deno.HttpServer<Deno.NetAddr> | undefined;
+const adapter = new HonoAdapter({
+  close: () => serve!.shutdown(),
+  address: () => serve!.addr.hostname,
+  async listen({ port, hostname, hono, httpsOptions = {}, forceCloseConnections }) {
+    serve = await Deno.serve({ port, hostname, key: httpsOptions.key, cert: httpsOptions.cert }, hono.fetch);
+  },
+});
+const app = await NestFactory.create<NestHonoApplication>(AppModule, adapter);
+await app.listen(3000, "127.0.0.1");
 ```
 
 ### Automatically infer content-type

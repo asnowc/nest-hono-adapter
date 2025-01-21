@@ -1,7 +1,7 @@
 import type { INestApplication } from "@nestjs/common";
 import type { ServerType } from "@hono/node-server";
 import type { HonoApplicationExtra, HonoBodyParser } from "./hono.impl.ts";
-import type { CORSOptions } from "./adapter.ts";
+import type { CORSOptions } from "./_adapter.ts";
 
 export interface NestHonoApplication<TServer extends ServerType = ServerType>
   extends INestApplication<TServer>,

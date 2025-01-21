@@ -4,14 +4,66 @@
 
 ### 使用
 
+`npm install @nestjs/core @nestjs/common nest-hono-adapter hono/node-server`
+
+**使用 FakeHttpServer 附加到已存在的 Hono 实例**
+
 ```ts
 import { NestFactory } from "@nestjs/core";
 import { Module } from "@nestjs/common";
 import { HonoAdapter, NestHonoApplication } from "nest-hono-adapter";
 
-const app = await NestFactory.create<NestHonoApplication>(AppModule, new HonoAdapter());
+const hono = new Hono();
 
-await app.listen(3000, "0.0.0.0");
+const app = await NestFactory.create<NestHonoApplication>(AppModule, new HonoAdapter({ hono }));
+await app.listen(3000, "0.0.0.0"); // 这不会真的监听 "0.0.0.0", HonoAdapter 会创建一个 FakeHttpServer, 因为 Nest 依赖它
+
+app.getUrl(); // FakeHttpServer 将返回 "127.0.0.1"，除非创建 HonoAdapter 时传递了 address 参数
+
+const response = await hono.request("/hi");
+```
+
+**或者使用真实的 HttpServer**
+
+```ts
+import { NestFactory } from "@nestjs/core";
+import { Module } from "@nestjs/common";
+import { HonoAdapter, NestHonoApplication } from "nest-hono-adapter";
+import { createAdaptorServer } from "hono/node-server";
+
+const app = await NestFactory.create<NestHonoApplication>(
+  AppModule,
+  new HonoAdapter({
+    initHttpServer({ hono, forceCloseConnections, httpsOptions }) {
+      return createAdaptorServer({
+        fetch: this.instance.fetch,
+        createServer: httpsOptions ? https.createServer : http.createServer,
+        overrideGlobalObjects: false,
+      });
+    },
+  })
+);
+```
+
+**使用 Deno.serve()**
+
+Hono 是支持多平台的，在 Deno 或 Bun 上，无需依赖 `hono/node-server`, 下面是使用 `Deno.serve()` 的示例
+
+```ts
+import { NestFactory } from "npm:@nestjs/core";
+import { Module } from "npm:@nestjs/common";
+import { HonoAdapter, NestHonoApplication } from "npm:nest-hono-adapter";
+
+let serve: Deno.HttpServer<Deno.NetAddr> | undefined;
+const adapter = new HonoAdapter({
+  close: () => serve!.shutdown(),
+  address: () => serve!.addr.hostname,
+  async listen({ port, hostname, hono, httpsOptions = {}, forceCloseConnections }) {
+    serve = await Deno.serve({ port, hostname, key: httpsOptions.key, cert: httpsOptions.cert }, hono.fetch);
+  },
+});
+const app = await NestFactory.create<NestHonoApplication>(AppModule, adapter);
+await app.listen(3000, "127.0.0.1");
 ```
 
 ### 自动推断 content-type

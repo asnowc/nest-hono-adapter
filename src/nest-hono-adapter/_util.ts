@@ -1,5 +1,5 @@
 import type { HonoRequest } from "hono/request";
-import type { NestHttpServerRequired, NestReqRequired } from "./nest.ts";
+import type { NestHttpServerRequired, NestReqRequired } from "./_nest.ts";
 import type { Context } from "hono";
 import { getConnInfo } from "hono/cloudflare-workers";
 

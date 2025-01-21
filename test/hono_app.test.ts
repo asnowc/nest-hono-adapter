@@ -3,7 +3,7 @@ import { GetParamModule } from "./modules/get_param.module.ts";
 import { HonoAdapter, NestHonoApplication } from "nest-hono-adapter";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./modules/hello_word.module.ts";
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertNotEquals } from "@std/assert";
 
 import { Hono } from "hono";
 import { Server } from "node:http";
@@ -40,6 +40,27 @@ Deno.test("custom http server", async () => {
     assertEquals(server.listening, false, "http server is closed");
   } finally {
     server.close();
+  }
+});
+
+Deno.test("Deno.serve", async () => {
+  let serve: Deno.HttpServer<Deno.NetAddr> | undefined;
+  const adapter = new HonoAdapter({
+    close: () => serve!.shutdown(),
+    address: () => serve!.addr.hostname,
+    async listen({ port, hostname, hono, httpsOptions = {}, forceCloseConnections }) {
+      serve = await Deno.serve({ port, hostname, key: httpsOptions.key, cert: httpsOptions.cert }, hono.fetch);
+    },
+  });
+  const app = await NestFactory.create<NestHonoApplication>(AppModule, adapter);
+  try {
+    await app.listen(3000, "127.0.0.1");
+    assertNotEquals(serve!, undefined);
+    assertEquals(serve?.addr.hostname, "127.0.0.1");
+    await app.close();
+    await serve?.finished;
+  } finally {
+    serve?.shutdown();
   }
 });
 
