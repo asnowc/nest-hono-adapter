@@ -1,5 +1,5 @@
-import { HonoRequest } from "hono/request";
-import { NestReq } from "./nest.ts";
+import type { HonoRequest } from "hono/request";
+import type { NestReq } from "./nest.ts";
 import type { Context } from "hono";
 import { getConnInfo } from "hono/cloudflare-workers";
 
@@ -13,38 +13,54 @@ export function createHonoReq(
 ): HonoReq {
   const { body, params, rawBody } = info;
   const honoReq = ctx.req as HonoReq;
-  let url: URL | undefined;
-  const nestReq: NestReq = {
+  ctx.req.queries();
+  ctx.req.query();
+  const nestReq: Omit<NestReq, "headers" | "query" | "ip"> = {
     rawBody,
     body,
-    headers: new Proxy(honoReq.raw.headers, {
-      get(target: Headers, p) {
-        return target.get(p as string);
-      },
-      ownKeys(target: Headers) {
-        return Array.from(target.keys());
-      },
-    }) as Record<string, any>,
-    query: new Proxy(
-      {},
-      {
-        get(target: any, p) {
-          if (!url) url = new URL(honoReq.url);
-          return url.searchParams.get(p as string);
-        },
-        ownKeys(target: any) {
-          if (!url) url = new URL(honoReq.url);
-          return Array.from(url.searchParams.keys());
-        },
-      }
-    ),
-    ip: getConnInfo(ctx).remote.address as string,
     session: ctx.get("session") ?? {},
     hosts: {}, //TODO hosts
     files: {}, //TODO files
     params: params,
   };
   Object.assign(honoReq, nestReq);
+
+  let ip: string | undefined;
+  let headers: Record<string, any> | undefined;
+  let query: Record<string, any> | undefined;
+  Object.defineProperties(honoReq, {
+    headers: {
+      get() {
+        return headers ?? (headers = Object.fromEntries(honoReq.raw.headers));
+      },
+      enumerable: true,
+    },
+    // HonoRequest already has a query attribute, so we need to use a Proxy to override it
+    query: {
+      value: new Proxy(ctx.req.query, {
+        get(rawQuery, key: string) {
+          if (!query) query = rawQuery.call(honoReq);
+          return query[key];
+        },
+        ownKeys(rawQuery) {
+          if (!query) query = rawQuery.call(honoReq);
+          return Object.keys(query);
+        },
+        apply(rawQuery, thisArg, args) {
+          return rawQuery.apply(thisArg, args as any);
+        },
+      }),
+      enumerable: true,
+      writable: false,
+    },
+    ip: {
+      get() {
+        return ip ?? (ip = getConnInfo(ctx).remote.address as string);
+      },
+      enumerable: true,
+    },
+  });
+
   return honoReq;
 }
 

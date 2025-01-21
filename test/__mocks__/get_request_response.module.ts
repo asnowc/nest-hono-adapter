@@ -1,11 +1,16 @@
 import { Module, Controller, Get, Res, Req } from "@nestjs/common";
-import type { HonoResponse, HonoRequest } from "@asla/nest-hono-adapter";
+import type { HonoResponse } from "@asla/nest-hono-adapter";
+import type { HonoRequest } from "hono";
 
 @Controller()
 class ExampleController {
   @Get("req")
   req(@Req() req: HonoRequest) {
-    return req.path;
+    return {
+      query: req.query(),
+      params: req.param(),
+      headers: req.header("abc"),
+    };
   }
   @Get("res")
   res(@Res() res: HonoResponse) {

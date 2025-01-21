@@ -11,8 +11,8 @@ Deno.test("使用 @Req() 获取请求", async function () {
   const { hono } = app;
   const res = await hono.request("/req");
   expect(res.status).toBe(200);
-  const data = await res.text();
-  assertEquals(data, "/req");
+  const data = await res.json();
+  assertEquals(data, { query: {}, params: {} });
 });
 Deno.test("使用 @Res() 获取响应", async function () {
   const { hono } = app;
