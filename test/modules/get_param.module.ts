@@ -1,4 +1,4 @@
-import { Module, Controller, Get, Param, Query, Body, Post, Headers, HostParam, Ip } from "@nestjs/common";
+import { Body, Controller, Get, Headers, HostParam, Ip, Module, Param, Post, Query } from "@nestjs/common";
 
 @Controller()
 class ExampleController {

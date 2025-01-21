@@ -1,4 +1,4 @@
-import { Module, Controller, Get } from "@nestjs/common";
+import { Controller, Get, Module } from "@nestjs/common";
 
 @Controller()
 class TestController {
@@ -7,5 +7,6 @@ class TestController {
     return "hello word";
   }
 }
+
 @Module({ controllers: [TestController] })
 export class AppModule {}

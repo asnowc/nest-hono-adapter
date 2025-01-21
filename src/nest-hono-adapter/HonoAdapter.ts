@@ -27,7 +27,7 @@ export interface CreateHonoAdapterOption {
  */
 export class HonoAdapter extends HonoRouterAdapter {
   #honoAdapterConfig: CreateHonoAdapterOption;
-  constructor(config: CreateHonoAdapterOption) {
+  constructor(config: CreateHonoAdapterOption = {}) {
     super(config.hono ?? new Hono());
     this.#honoAdapterConfig = config;
   }
@@ -38,7 +38,7 @@ export class HonoAdapter extends HonoRouterAdapter {
     if (typeof callback !== "function") callback = undefined;
     const config = this.#honoAdapterConfig;
 
-    if (config.listen)
+    if (config.listen) {
       try {
         const hostname = typeof args[0] === "string" ? args[0] : undefined;
         await config.listen({
@@ -51,6 +51,7 @@ export class HonoAdapter extends HonoRouterAdapter {
         callback(error);
         return;
       }
+    }
     if (isFakeHttpServer(this.httpServer)) {
       this.httpServer.address = config.address ?? (() => "127.0.0.1");
       callback?.();

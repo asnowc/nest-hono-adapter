@@ -1,4 +1,4 @@
-import type { Context, Next, Hono, HonoRequest, Env, Schema } from "hono";
+import type { Context, Env, Hono, HonoRequest, Next, Schema } from "hono";
 import { serveStatic } from "hono/deno";
 import type { ServeStaticOptions } from "hono/serve-static";
 import { bodyLimit as bodyLimitMid } from "hono/body-limit";
@@ -11,7 +11,7 @@ import { AbstractHttpAdapter } from "@nestjs/core/adapters/http-adapter.js";
 
 import type { BlankEnv, BlankSchema } from "hono/types";
 import type { NestHandler, NestHttpServerRequired } from "./_nest.ts";
-import { createHonoRes, createHonoReq, sendResult, InternalHonoReq, InternalHonoRes } from "./_util.ts";
+import { createHonoReq, createHonoRes, InternalHonoReq, InternalHonoRes, sendResult } from "./_util.ts";
 import type { HonoApplicationExtra, HonoBodyParser } from "./hono.impl.ts";
 import type { CorsOptions, CorsOptionsDelegate } from "@nestjs/common/interfaces/external/cors-options.interface.js";
 
@@ -24,7 +24,7 @@ type NestHonoHandler = NestHandler<InternalHonoReq, InternalHonoRes>;
 export interface HonoRouterAdapter<
   E extends Env = BlankEnv,
   S extends Schema = BlankSchema,
-  BasePath extends string = "/"
+  BasePath extends string = "/",
 > extends AbstractHttpAdapter<NestHttpServerRequired, InternalHonoReq, InternalHonoRes> {
   getInstance(): Hono<E, S, BasePath>;
   getInstance<T = any>(): T;
@@ -32,10 +32,9 @@ export interface HonoRouterAdapter<
 
 export abstract class HonoRouterAdapter
   extends AbstractHttpAdapter<NestHttpServerRequired, InternalHonoReq, InternalHonoRes>
-  implements HonoApplicationExtra
-{
-  protected declare readonly instance: Hono;
-  protected declare httpServer: NestHttpServerRequired;
+  implements HonoApplicationExtra {
+  declare protected readonly instance: Hono;
+  declare protected httpServer: NestHttpServerRequired;
 
   private createRouteHandler(routeHandler: NestHonoHandler) {
     return async (ctx: Context, next?: Next): Promise<Response> => {
@@ -50,7 +49,7 @@ export abstract class HonoRouterAdapter
       await routeHandler(
         createHonoReq(ctx, { body, params: ctx.req.param(), rawBody: undefined }),
         createHonoRes(ctx),
-        next
+        next,
       );
       return sendResult(ctx, nestHeaders);
     };
@@ -103,7 +102,7 @@ export abstract class HonoRouterAdapter
         onError: () => {
           throw new Error("Body too large");
         },
-      })
+      }),
     );
   }
 
@@ -274,7 +273,7 @@ export abstract class HonoRouterAdapter
 }
 function getRouteAndHandler(
   pathOrHandler: string | NestHonoHandler,
-  handler?: NestHonoHandler
+  handler?: NestHonoHandler,
 ): [string, NestHonoHandler] {
   let path: string;
   if (typeof pathOrHandler === "function") {

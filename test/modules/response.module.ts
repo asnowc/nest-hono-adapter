@@ -1,4 +1,4 @@
-import { Module, Controller, Get, Redirect, HttpCode, Header } from "@nestjs/common";
+import { Controller, Get, Header, HttpCode, Module, Redirect } from "@nestjs/common";
 
 @Controller()
 class ExampleController {

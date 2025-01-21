@@ -9,7 +9,7 @@ export function createHonoReq(
     body: Record<string, any>;
     params: Record<string, string>;
     rawBody: any;
-  }
+  },
 ): InternalHonoReq {
   const { body, params, rawBody } = info;
   const honoReq = ctx.req as InternalHonoReq;
@@ -161,6 +161,6 @@ export function createNestRequiredHttpServer(): NestHttpServerRequired {
         target[key] = value;
         return value;
       },
-    }
+    },
   );
 }

@@ -2,7 +2,9 @@
   "name": "@asn/nest-hono-adapter",
   "version": "0.1.0",
   "tasks": {
-    "test": "deno test -A"
+    "test": "deno test -A",
+    "check": "deno check src test",
+    "check-fmt": "deno fmt --check src test"
   },
   "exports": "./src/mod.ts",
   "imports": {
@@ -18,6 +20,7 @@
   "fmt": {
     "lineWidth": 120
   },
+  "exclude": ["dist", "node_modules", "test/exp"],
   "compilerOptions": {
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true

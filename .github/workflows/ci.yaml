@@ -16,3 +16,15 @@ jobs:
       - run: deno install
       - name: Test
         run: deno task test
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2
+      - run: deno install
+      - run: deno task check
+      - run: deno task check-fmt
