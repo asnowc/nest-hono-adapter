@@ -20,7 +20,7 @@ jobs:
       matrix:
         nodeVersion: [18, 20, 22]
     steps:
-      - run: actions/checkout@v4
+      - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2
