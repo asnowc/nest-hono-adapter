@@ -4,7 +4,8 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "build": "npm exec --package=typescript@5 tsc"
+    "build": "npm exec --package=typescript@5 tsc",
+    "test": "node node_modules/vitest/vitest.mjs run"
   },
   "exports": "./dist/mod.js",
   "peerDependencies": {
@@ -13,7 +14,8 @@
     "hono": "^4.6.17"
   },
   "devDependencies": {
-    "@types/node": "^22.10.7"
+    "@types/node": "^22.10.7",
+    "vitest": "^3.0.4"
   },
   "files": ["dist/**"],
   "keywords": ["nest", "nestjs", "hono", "nest-hono-adapter", "nest adapter"],

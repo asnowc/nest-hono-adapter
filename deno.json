@@ -2,16 +2,12 @@
   "name": "@asn/nest-hono-adapter",
   "version": "0.1.0",
   "tasks": {
-    "test": "deno test -A",
+    "test": "deno run -A npm:vitest run",
     "check": "deno check src test",
     "check-fmt": "deno fmt --check src test"
   },
   "exports": "./src/mod.ts",
   "imports": {
-    "@std/expect": "jsr:@std/expect@^1.0.11",
-    "@std/testing": "jsr:@std/testing@^1.0.9",
-    "@std/assert": "jsr:@std/assert@1",
-
     "@nestjs/common": "npm:@nestjs/common@^10.4.15",
     "@nestjs/core": "npm:@nestjs/core@^10.4.15",
     "hono": "npm:hono@^4.6.17",

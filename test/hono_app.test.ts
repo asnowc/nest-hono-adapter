@@ -1,6 +1,6 @@
 import { HonoAdapter, NestHonoApplication } from "nest-hono-adapter";
 import { NestFactory } from "@nestjs/core";
-import { assertEquals, assertNotEquals } from "@std/assert";
+import { expect, test } from "vitest";
 
 import { Hono } from "hono";
 import { Server } from "node:http";
@@ -16,18 +16,18 @@ class TestController {
 @Module({ controllers: [TestController] })
 class AppModule {}
 
-Deno.test("listen fake http server", async function () {
+test("listen fake http server", async function () {
   const hono = new Hono();
   const app = await NestFactory.create<NestHonoApplication>(AppModule, new HonoAdapter({ hono }), { logger: false });
 
   await app.listen(3000, "127.0.0.1");
   const res = await hono.request("/hi");
-  assertEquals(res.status, 200);
+  expect(res.status).toBe(200);
   const text = await res.text();
-  assertEquals(text, "hello word");
+  expect(text).toBe("hello word");
 });
 
-Deno.test("custom http server", async () => {
+test("custom http server", async () => {
   const server = new Server();
 
   const adapter = new HonoAdapter({
@@ -38,15 +38,15 @@ Deno.test("custom http server", async () => {
   const app = await NestFactory.create<NestHonoApplication>(AppModule, adapter, { logger: false });
   try {
     await app.listen(3000, "127.0.0.1");
-    assertEquals(server.listening, true, "http server is listening");
+    expect(server.listening, "http server is listening").toBe(true);
     await app.close();
-    assertEquals(server.listening, false, "http server is closed");
+    expect(server.listening, "http server is closed").toBe(false);
   } finally {
     server.close();
   }
 });
 
-Deno.test("Deno.serve", async () => {
+test.runIf(globalThis.Deno)("Deno.serve", async () => {
   let serve: Deno.HttpServer<Deno.NetAddr> | undefined;
   const adapter = new HonoAdapter({
     close: () => serve!.shutdown(),
@@ -58,8 +58,8 @@ Deno.test("Deno.serve", async () => {
   const app = await NestFactory.create<NestHonoApplication>(AppModule, adapter, { logger: false });
   try {
     await app.listen(3000, "127.0.0.1");
-    assertNotEquals(serve!, undefined);
-    assertEquals(serve?.addr.hostname, "127.0.0.1");
+    expect(serve).not.toBeUndefined();
+    expect(serve?.addr.hostname).toBe("127.0.0.1");
     await app.close();
     await serve?.finished;
   } finally {
@@ -68,11 +68,11 @@ Deno.test("Deno.serve", async () => {
 });
 
 //TODO
-Deno.test("use", { ignore: true }, async () => {
+test.skip("use", async () => {
 });
-Deno.test("enableCros", { ignore: true }, async () => {
+test.skip("enableCros", async () => {
 });
-Deno.test("useBodyParser", { ignore: true }, async () => {
+test.skip("useBodyParser", async () => {
 });
-Deno.test("useWebSocketAdapter", { ignore: true }, async () => {
+test.skip("useWebSocketAdapter", async () => {
 });

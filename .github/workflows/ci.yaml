@@ -4,25 +4,37 @@ on:
     branches:
       - "*"
 jobs:
-  test:
+  test-deno:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Deno
-        uses: denoland/setup-deno@v2
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
         with:
           deno-version: v2
       - run: deno install
       - name: Test
         run: deno task test
+  test-node:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        nodeVersion: [18, 20, 22]
+    steps:
+      - run: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2
+      - run: deno install
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{matrix.nodeVersion}}
+      - name: Test
+        run: npm run test
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Deno
-        uses: denoland/setup-deno@v2
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
         with:
           deno-version: v2
       - run: deno install
