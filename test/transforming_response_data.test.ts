@@ -69,10 +69,11 @@ test("Returns undefined or null", async function () {
 test("The response header is set and a Uint8Array is returned", async function () {
   @Controller()
   class TestController {
-    @Header("content-type", "application/json")
+    @Header("content-type", "text/plain; charset=UTF-8")
     @Get("get")
     customContentType() {
-      return new TextEncoder().encode(JSON.stringify({ data: "abc" }));
+      const u8Arr = new TextEncoder().encode("1abc2");
+      return u8Arr.subarray(1, -1);
     }
   }
   @Module({ controllers: [TestController] })
@@ -81,9 +82,8 @@ test("The response header is set and a Uint8Array is returned", async function (
   const { hono } = await createNestHono(AppModule);
 
   const res = await hono.request("/get");
-  expect(res.headers.get("content-type")).toBe("application/json");
-  const json = await res.json();
-  expect(json).toEqual({ data: "abc" });
+  expect(res.headers.get("content-type")).toBe("text/plain; charset=utf-8");
+  await expect(res.text()).resolves.toBe("abc");
 });
 test("The object is returned but with content-type set", async function () {
   @Controller()

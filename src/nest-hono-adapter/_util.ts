@@ -13,8 +13,7 @@ export function createHonoReq(
 ): InternalHonoReq {
   const { body, params, rawBody } = info;
   const honoReq = ctx.req as InternalHonoReq;
-  ctx.req.queries();
-  ctx.req.query();
+  if (Object.hasOwn(honoReq, HONO_REQ)) return honoReq;
   const nestReq: Omit<NestReqRequired, "headers" | "query" | "ip"> = {
     rawBody,
     body,
@@ -28,6 +27,7 @@ export function createHonoReq(
   let ip: string | undefined;
   let headers: Record<string, any> | undefined;
   let query: Record<string, any> | undefined;
+
   Object.defineProperties(honoReq, {
     headers: {
       get() {
@@ -59,10 +59,14 @@ export function createHonoReq(
       },
       enumerable: true,
     },
+    [HONO_REQ]: {
+      value: true,
+    },
   });
 
   return honoReq;
 }
+const HONO_REQ = Symbol("Hono Request");
 
 function mountResponse(ctx: Context, data: any) {
   Reflect.set(ctx, NEST_BODY, data);
@@ -86,7 +90,7 @@ export function sendResult(ctx: Context, headers: Record<string, string>) {
       if (body === null) response = ctx.body(null);
       else if (body instanceof Response) response = body;
       else if (body instanceof ReadableStream) response = ctx.body(body);
-      else if (body instanceof Uint8Array) response = ctx.body(ReadableStream.from([body]));
+      else if (body instanceof Uint8Array) response = ctx.body(body);
       else if (body instanceof Blob) response = ctx.body(body.stream());
       else response = ctx.json(body);
       break;
