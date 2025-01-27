@@ -8,8 +8,8 @@
   },
   "exports": "./src/mod.ts",
   "imports": {
-    "@nestjs/common": "npm:@nestjs/common@^10.4.15",
-    "@nestjs/core": "npm:@nestjs/core@^10.4.15",
+    "@nestjs/common": "npm:@nestjs/common@^9.4.3",
+    "@nestjs/core": "npm:@nestjs/core@^9.4.3",
     "hono": "npm:hono@^4.6.17",
     "nest-hono-adapter": "./src/mod.ts"
   },

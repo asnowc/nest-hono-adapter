@@ -1,6 +1,6 @@
 ## The adapter for Nest is implemented using Hono
 
-**Required Nest >=10**
+**Required Nest >=9 and Node >=18**
 
 [[中文文档]](./README.zh.md)
 
