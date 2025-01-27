@@ -65,8 +65,19 @@ let serve: Deno.HttpServer<Deno.NetAddr> | undefined;
 const adapter = new HonoAdapter({
   close: () => serve!.shutdown(),
   address: () => serve!.addr.hostname,
-  async listen({ port, hostname, hono, httpsOptions = {}, forceCloseConnections }) {
-    serve = await Deno.serve({ port, hostname, key: httpsOptions.key, cert: httpsOptions.cert }, hono.fetch);
+  listen({ port, hostname, hono, httpsOptions = {}, forceCloseConnections }) {
+    return new Promise<void>((resolve) => {
+      serve = Deno.serve(
+        {
+          onListen: () => resolve(),
+          port,
+          hostname,
+          key: httpsOptions.key,
+          cert: httpsOptions.cert,
+        },
+        hono.fetch,
+      );
+    });
   },
 });
 const app = await NestFactory.create<NestHonoApplication>(AppModule, adapter);
