@@ -1,7 +1,6 @@
 import type { HonoRequest } from "hono/request";
 import type { NestHttpServerRequired, NestReqRequired } from "./_nest.ts";
 import type { Context } from "hono";
-import { getConnInfo } from "hono/cloudflare-workers";
 
 export function createHonoReq(
   ctx: Context,
@@ -13,7 +12,7 @@ export function createHonoReq(
 ): InternalHonoReq {
   const { body, params, rawBody } = info;
   const honoReq = ctx.req as InternalHonoReq;
-  if (Object.hasOwn(honoReq, HONO_REQ)) return honoReq;
+  if (Object.hasOwn(honoReq, IS_HONO_REQUEST)) return honoReq;
   const nestReq: Omit<NestReqRequired, "headers" | "query" | "ip"> = {
     rawBody,
     body,
@@ -55,18 +54,18 @@ export function createHonoReq(
     },
     ip: {
       get() {
-        return ip ?? (ip = getConnInfo(ctx).remote.address as string);
+        return "";
       },
       enumerable: true,
     },
-    [HONO_REQ]: {
+    [IS_HONO_REQUEST]: {
       value: true,
     },
   });
 
   return honoReq;
 }
-const HONO_REQ = Symbol("Hono Request");
+const IS_HONO_REQUEST = Symbol("Is Hono Request");
 
 function mountResponse(ctx: Context, data: any) {
   Reflect.set(ctx, NEST_BODY, data);
