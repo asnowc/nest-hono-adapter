@@ -150,8 +150,7 @@ object, the function's return value is ignored
 
 ### Unsupported decorators
 
-| Decorators   | Remarks                           |
-| ------------ | --------------------------------- |
-| @Ip()        | Not supported yet                 |
-| @HostParam() | Not sure what this decorator does |
-| @Session()   | Not tested                        |
+| Decorators | Remarks           |
+| ---------- | ----------------- |
+| @Ip()      | Not supported yet |
+| @Session() | Not tested        |

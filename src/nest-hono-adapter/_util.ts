@@ -17,7 +17,7 @@ export function createHonoReq(
     rawBody,
     body,
     session: ctx.get("session") ?? {},
-    hosts: {}, //TODO hosts
+    //hosts: {}, //nest sets up hosts automatically
     files: {}, //TODO files
     params: params,
   };

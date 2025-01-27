@@ -89,16 +89,12 @@ test("使用 @Headers() 获取请求头", async function () {
   const res = await hono.request("/headers", { headers: { abc: "123" } });
   await expect(res.text()).resolves.toBe("123");
 });
-//TODO
-test.todo("使用 @HostParam() 获取 host", async function () {
-  @Controller()
+
+test("Get the host parameter using @HostParam()", async function () {
+  @Controller({ host: ":p.abc.com" })
   class TestController {
-    @Get("headers")
-    headers(@Headers("abc") abc: string) {
-      return abc;
-    }
     @Get("HostParam")
-    hostParam(@HostParam() host: string) {
+    hostParam(@HostParam("p") host: string) {
       return host;
     }
   }
@@ -107,8 +103,8 @@ test.todo("使用 @HostParam() 获取 host", async function () {
   class AppModule {}
   const { hono } = await createNestHono(AppModule);
 
-  const res = await hono.request("/HostParam", { headers: { host: "abc.com" } });
-  await expect(res.text()).resolves.toBe("abc.com");
+  const res = await hono.request("/HostParam", { headers: { host: "123.abc.com" } });
+  await expect(res.text()).resolves.toBe("123");
 });
 //TODO
 test.todo("使用 @Ip() 获取 ip", async function () {
