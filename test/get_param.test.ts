@@ -1,10 +1,9 @@
 import { createNestHono } from "./__mocks__/create.ts";
-import { expect } from "@std/expect";
-import { assertEquals } from "@std/assert";
+import { expect, test } from "vitest";
 
 import { Body, Controller, Get, Headers, HostParam, Ip, Module, Param, Post, Query } from "@nestjs/common";
 
-Deno.test("使用 @Query() 获取参数", async function () {
+test("使用 @Query() 获取参数", async function () {
   @Controller()
   class TestController {
     @Get("query")
@@ -17,10 +16,9 @@ Deno.test("使用 @Query() 获取参数", async function () {
   const { hono } = await createNestHono(AppModule);
 
   const res = await hono.request("/query?abc=aa");
-  const text = await res.text();
-  assertEquals(text, "aa");
+  await expect(res.text()).resolves.toBe("aa");
 });
-Deno.test("使用 @Param() 获取参数", async function () {
+test("使用 @Param() 获取参数", async function () {
   @Controller()
   class TestController {
     @Get("param/:id")
@@ -34,11 +32,10 @@ Deno.test("使用 @Param() 获取参数", async function () {
   const { hono } = await createNestHono(AppModule);
 
   const res = await hono.request("/param/aa");
-  const text = await res.text();
-  assertEquals(text, "aa");
+  await expect(res.text()).resolves.toBe("aa");
 });
 
-Deno.test("使用 @Body() 获取 Body", async function () {
+test("使用 @Body() 获取 Body", async function () {
   @Controller()
   class TestController {
     @Post("body")
@@ -57,10 +54,9 @@ Deno.test("使用 @Body() 获取 Body", async function () {
     headers: { "content-type": "application/json" },
   });
   expect(res.status).toBe(201);
-  const text = await res.text();
-  assertEquals(text, "1");
+  await expect(res.text()).resolves.toBe("1");
 });
-Deno.test("使用 @Body() 获取 未解析的 body", async function () {
+test("使用 @Body() 获取 未解析的 body", async function () {
   @Controller()
   class TestController {
     @Post("body")
@@ -75,10 +71,9 @@ Deno.test("使用 @Body() 获取 未解析的 body", async function () {
 
   const res = await hono.request("/body", { method: "POST", body: JSON.stringify({ abc: "1" }) });
   expect(res.status).toBe(201);
-  const text = await res.text();
-  assertEquals(text, "");
+  await expect(res.text()).resolves.toBe("");
 });
-Deno.test("使用 @Headers() 获取请求头", async function () {
+test("使用 @Headers() 获取请求头", async function () {
   @Controller()
   class TestController {
     @Get("headers")
@@ -92,19 +87,14 @@ Deno.test("使用 @Headers() 获取请求头", async function () {
   const { hono } = await createNestHono(AppModule);
 
   const res = await hono.request("/headers", { headers: { abc: "123" } });
-  const text = await res.text();
-  assertEquals(text, "123");
+  await expect(res.text()).resolves.toBe("123");
 });
-//TODO
-Deno.test("使用 @HostParam() 获取 host", { ignore: true }, async function () {
-  @Controller()
+
+test("Get the host parameter using @HostParam()", async function () {
+  @Controller({ host: ":p.abc.com" })
   class TestController {
-    @Get("headers")
-    headers(@Headers("abc") abc: string) {
-      return abc;
-    }
     @Get("HostParam")
-    hostParam(@HostParam() host: string) {
+    hostParam(@HostParam("p") host: string) {
       return host;
     }
   }
@@ -113,12 +103,11 @@ Deno.test("使用 @HostParam() 获取 host", { ignore: true }, async function ()
   class AppModule {}
   const { hono } = await createNestHono(AppModule);
 
-  const res = await hono.request("/HostParam", { headers: { host: "abc.com" } });
-  const text = await res.text();
-  assertEquals(text, "abc.com");
+  const res = await hono.request("/HostParam", { headers: { host: "123.abc.com" } });
+  await expect(res.text()).resolves.toBe("123");
 });
 //TODO
-Deno.test("使用 @Ip() 获取 ip", { ignore: true }, async function () {
+test.todo("使用 @Ip() 获取 ip", async function () {
   @Controller()
   class TestController {
     @Get("ip")
@@ -133,5 +122,5 @@ Deno.test("使用 @Ip() 获取 ip", { ignore: true }, async function () {
 
   const res = await hono.request("/ip", {});
   const text = await res.text();
-  assertEquals(text, "127.0.0.1");
+  expect(text).toBe("127.0.0.1");
 });

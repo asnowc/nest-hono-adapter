@@ -1,11 +1,10 @@
 import { createNestHono } from "./__mocks__/create.ts";
-import { expect } from "@std/expect";
-import { assertEquals } from "@std/assert";
 import { Controller, Get, Module, Req, Res } from "@nestjs/common";
 import type { HonoResponse } from "nest-hono-adapter";
 import type { HonoRequest } from "hono";
+import { expect, test } from "vitest";
 
-Deno.test("使用 @Req() 获取请求", async function () {
+test("使用 @Req() 获取请求", async function () {
   @Controller()
   class ExampleController {
     @Get("req")
@@ -26,9 +25,9 @@ Deno.test("使用 @Req() 获取请求", async function () {
   const res = await hono.request("/req");
   expect(res.status).toBe(200);
   const data = await res.json();
-  assertEquals(data, { query: {}, params: {} });
+  expect(data).toEqual({ query: {}, params: {} });
 });
-Deno.test("使用 @Res() 获取响应", async function () {
+test("使用 @Res() 获取响应", async function () {
   @Controller()
   class ExampleController {
     @Get("res")
@@ -45,9 +44,9 @@ Deno.test("使用 @Res() 获取响应", async function () {
   const res = await hono.request("/res");
   expect(res.status).toBe(200);
   const data = await res.text();
-  assertEquals(data, "/res");
+  expect(data).toEqual("/res");
 });
-Deno.test("使用 @Res() 获取响应, 但函数返回前未调用 send(), 将响应空的 body", async function () {
+test("使用 @Res() 获取响应, 但函数返回前未调用 send(), 将响应空的 body", async function () {
   @Controller()
   class ExampleController {
     @Get("resNoSend")

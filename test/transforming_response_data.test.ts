@@ -1,7 +1,7 @@
 import { createNestHono } from "./__mocks__/create.ts";
-import { expect } from "@std/expect";
 import { Controller, Get, Header, Module } from "@nestjs/common";
-Deno.test("Returns object", async function () {
+import { expect, test } from "vitest";
+test("Returns object", async function () {
   @Controller()
   class TestController {
     @Get("json")
@@ -20,7 +20,7 @@ Deno.test("Returns object", async function () {
   expect(res.status).toBe(200);
   await expect(res.json(), "should be parsed to json").resolves.toEqual({ abc: 2, d: 2 });
 });
-Deno.test("Returns string", async function () {
+test("Returns string", async function () {
   @Controller()
   class TestController {
     @Get("text")
@@ -39,7 +39,7 @@ Deno.test("Returns string", async function () {
   expect(res.status).toBe(200);
   await expect(res.text(), "should be parsed to text").resolves.toBe("string");
 });
-Deno.test("Returns undefined or null", async function () {
+test("Returns undefined or null", async function () {
   @Controller()
   class TestController {
     @Get("undefined")
@@ -66,13 +66,14 @@ Deno.test("Returns undefined or null", async function () {
   expect(resUndefined.headers.get("content-type")).toBe(null);
   expect(resUndefined.body).toBe(null);
 });
-Deno.test("The response header is set and a Uint8Array is returned", async function () {
+test("The response header is set and a Uint8Array is returned", async function () {
   @Controller()
   class TestController {
-    @Header("content-type", "application/json")
+    @Header("content-type", "text/plain; charset=UTF-8")
     @Get("get")
     customContentType() {
-      return new TextEncoder().encode(JSON.stringify({ data: "abc" }));
+      const u8Arr = new TextEncoder().encode("1abc2");
+      return u8Arr.subarray(1, -1);
     }
   }
   @Module({ controllers: [TestController] })
@@ -81,11 +82,10 @@ Deno.test("The response header is set and a Uint8Array is returned", async funct
   const { hono } = await createNestHono(AppModule);
 
   const res = await hono.request("/get");
-  expect(res.headers.get("content-type")).toBe("application/json");
-  const json = await res.json();
-  expect(json).toEqual({ data: "abc" });
+  expect(res.headers.get("content-type")).toBe("text/plain; charset=utf-8");
+  await expect(res.text()).resolves.toBe("abc");
 });
-Deno.test("The object is returned but with content-type set", async function () {
+test("The object is returned but with content-type set", async function () {
   @Controller()
   class TestController {
     @Header("content-type", "text/html")

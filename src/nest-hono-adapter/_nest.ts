@@ -9,7 +9,7 @@ export interface NestReqRequired {
   body: Record<string, any>;
   params: Record<string, string | undefined>;
   ip: string;
-  hosts: Record<string, string | undefined>;
+  hosts?: Record<string, string | undefined>;
   query: Record<string, string | undefined>;
   headers: Record<string, string | undefined>;
 }

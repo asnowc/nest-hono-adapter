@@ -264,9 +264,9 @@ export abstract class HonoRouterAdapter
   applyVersionFilter(): () => () => any {
     throw new Error("Versioning not yet supported in Hono"); //TODO applyVersionFilter
   }
-  //implement
+  //@ts-ignore nest 10 implement
   override getHeader = undefined;
-  //implement
+  //@ts-ignore nest 10 implement
   override appendHeader = undefined;
 }
 function getRouteAndHandler(

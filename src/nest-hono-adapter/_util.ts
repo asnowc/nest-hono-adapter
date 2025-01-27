@@ -1,7 +1,6 @@
 import type { HonoRequest } from "hono/request";
 import type { NestHttpServerRequired, NestReqRequired } from "./_nest.ts";
 import type { Context } from "hono";
-import { getConnInfo } from "hono/cloudflare-workers";
 
 export function createHonoReq(
   ctx: Context,
@@ -13,13 +12,12 @@ export function createHonoReq(
 ): InternalHonoReq {
   const { body, params, rawBody } = info;
   const honoReq = ctx.req as InternalHonoReq;
-  ctx.req.queries();
-  ctx.req.query();
+  if (Object.hasOwn(honoReq, IS_HONO_REQUEST)) return honoReq;
   const nestReq: Omit<NestReqRequired, "headers" | "query" | "ip"> = {
     rawBody,
     body,
     session: ctx.get("session") ?? {},
-    hosts: {}, //TODO hosts
+    //hosts: {}, //nest sets up hosts automatically
     files: {}, //TODO files
     params: params,
   };
@@ -28,6 +26,7 @@ export function createHonoReq(
   let ip: string | undefined;
   let headers: Record<string, any> | undefined;
   let query: Record<string, any> | undefined;
+
   Object.defineProperties(honoReq, {
     headers: {
       get() {
@@ -55,14 +54,18 @@ export function createHonoReq(
     },
     ip: {
       get() {
-        return ip ?? (ip = getConnInfo(ctx).remote.address as string);
+        return "";
       },
       enumerable: true,
+    },
+    [IS_HONO_REQUEST]: {
+      value: true,
     },
   });
 
   return honoReq;
 }
+const IS_HONO_REQUEST = Symbol("Is Hono Request");
 
 function mountResponse(ctx: Context, data: any) {
   Reflect.set(ctx, NEST_BODY, data);
@@ -86,7 +89,7 @@ export function sendResult(ctx: Context, headers: Record<string, string>) {
       if (body === null) response = ctx.body(null);
       else if (body instanceof Response) response = body;
       else if (body instanceof ReadableStream) response = ctx.body(body);
-      else if (body instanceof Uint8Array) response = ctx.body(ReadableStream.from([body]));
+      else if (body instanceof Uint8Array) response = ctx.body(body);
       else if (body instanceof Blob) response = ctx.body(body.stream());
       else response = ctx.json(body);
       break;

@@ -1,6 +1,6 @@
 ## The adapter for Nest is implemented using Hono
 
-**Required Nest >=10**
+**Required Nest >=9 and Node >=18**
 
 [[中文文档]](./README.zh.md)
 
@@ -150,8 +150,7 @@ object, the function's return value is ignored
 
 ### Unsupported decorators
 
-| Decorators   | Remarks                                                                                |
-| ------------ | -------------------------------------------------------------------------------------- |
-| @Ip()        | Can't seem to get the ip via Hono, getConnInfo(ctx).remote.address is always undefined |
-| @HostParam() | Not sure what this decorator does                                                      |
-| @Session()   | Not tested                                                                             |
+| Decorators | Remarks           |
+| ---------- | ----------------- |
+| @Ip()      | Not supported yet |
+| @Session() | Not tested        |

@@ -28,3 +28,6 @@ export interface NestHonoApplication<TServer extends NestHttpServerRequired = Ne
   enableCors(options?: CORSOptions): void;
   enableCors(options: any): void;
 }
+declare module "@nestjs/common" {
+  interface INestApplication<TServer = any> {}
+}
