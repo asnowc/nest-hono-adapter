@@ -159,9 +159,9 @@ class ExampleController {
 `res.send()` is signed send(response: Response). Because of nest's mechanism, when you use `@Res()` to get the response
 object, the function's return value is ignored
 
-### Unsupported decorators
+### The value taken by the argument decorator
 
-| Decorators | Remarks           |
-| ---------- | ----------------- |
-| @Ip()      | Not supported yet |
-| @Session() | Not tested        |
+| Decorators | Remarks                |
+| ---------- | ---------------------- |
+| @Ip()      | Not supported yet      |
+| @Session() | Context.get("cession") |

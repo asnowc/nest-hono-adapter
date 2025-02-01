@@ -158,9 +158,9 @@ class ExampleController {
 
 `res.send()` 签名为 send(response: Response)。 由于 nest 的机制，使用 `@Res()` 获取响应对象后，函数的返回值会被忽略
 
-### 未支持的装饰器
+### 参数装饰器获取的值
 
-| 装饰器     | 备注     |
-| ---------- | -------- |
-| @Ip()      | 暂不支持 |
-| @Session() | 未测试   |
+| 装饰器     | 备注                   |
+| ---------- | ---------------------- |
+| @Ip()      | 暂不支持               |
+| @Session() | Context.get("cession") |
