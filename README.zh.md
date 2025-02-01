@@ -139,12 +139,12 @@ class Test {
 
 ```ts
 import type { HonoResponse } from "nest-hono-adapter";
-import type { HonoRequest } from "hono";
+import type { Context } from "hono";
 
 @Controller()
 class ExampleController {
   @Get("req")
-  req(@Req() req: HonoRequest) {
+  req(@Req() req: Context) {
     return req.path;
   }
   @Get("res") // request "/res" will response 'text'
@@ -160,8 +160,7 @@ class ExampleController {
 
 ### 未支持的装饰器
 
-| 装饰器       | 备注                         |
-| ------------ | ---------------------------- |
-| @Ip()        | 暂不支持                     |
-| @HostParam() | 暂时不清楚这个装饰器有什么用 |
-| @Session()   | 未测试                       |
+| 装饰器     | 备注     |
+| ---------- | -------- |
+| @Ip()      | 暂不支持 |
+| @Session() | 未测试   |

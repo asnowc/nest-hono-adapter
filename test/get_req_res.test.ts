@@ -1,14 +1,15 @@
 import { createNestHono } from "./__mocks__/create.ts";
 import { Controller, Get, Module, Req, Res } from "@nestjs/common";
 import type { HonoResponse } from "nest-hono-adapter";
-import type { HonoRequest } from "hono";
+import type { Context } from "hono";
 import { expect, test } from "vitest";
 
 test("使用 @Req() 获取请求", async function () {
   @Controller()
   class ExampleController {
     @Get("req")
-    req(@Req() req: HonoRequest) {
+    req(@Req() ctx: Context) {
+      const req = ctx.req;
       return {
         query: req.query(),
         params: req.param(),
@@ -32,6 +33,7 @@ test("使用 @Res() 获取响应", async function () {
   class ExampleController {
     @Get("res")
     res(@Res() res: HonoResponse) {
+      res.body(null);
       res.send(res.text("/res"));
     }
   }

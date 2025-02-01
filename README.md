@@ -139,12 +139,12 @@ class Test {
 
 ```ts
 import type { HonoResponse } from "nest-hono-adapter";
-import type { HonoRequest } from "hono";
+import type { Context } from "hono";
 
 @Controller()
 class ExampleController {
   @Get("req")
-  req(@Req() req: HonoRequest) {
+  req(@Req() req: Context) {
     return req.path;
   }
   @Get("res") // request "/res" will response 'text'
