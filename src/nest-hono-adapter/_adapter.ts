@@ -1,4 +1,4 @@
-import type { Context, Env, Hono, HonoRequest, Next, Schema } from "hono";
+import type { Context, Env, Hono, Next, Schema } from "hono";
 
 import type { ServeStaticOptions } from "hono/serve-static";
 import { bodyLimit as bodyLimitMid } from "hono/body-limit";
@@ -130,15 +130,15 @@ export abstract class HonoRouterAdapter
   }
   //implement
   getRequestHostname(request: InternalHonoReq): string {
-    return request.header("Host") ?? "";
+    return request.req.header("Host") ?? "";
   }
   //implement
-  getRequestMethod(request: HonoRequest): string {
-    return request.method;
+  getRequestMethod(request: InternalHonoReq): string {
+    return request.req.method;
   }
   //implement
-  getRequestUrl(request: HonoRequest): string {
-    return request.url;
+  getRequestUrl(request: InternalHonoReq): string {
+    return request.req.url;
   }
   // implement
   status(res: InternalHonoRes, statusCode: StatusCode) {

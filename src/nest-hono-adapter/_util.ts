@@ -1,4 +1,3 @@
-import type { HonoRequest } from "hono/request";
 import type { NestHttpServerRequired, NestReqRequired } from "./_nest.ts";
 import type { Context } from "hono";
 
@@ -10,12 +9,12 @@ export function createHonoReq(
     rawBody: any;
   },
 ): InternalHonoReq {
-  const { body, params, rawBody } = info;
-  const honoReq = ctx.req as InternalHonoReq;
+  const { params, rawBody } = info;
+  let body = info.body ?? {};
+  const honoReq = ctx as InternalHonoReq;
   if (Object.hasOwn(honoReq, IS_HONO_REQUEST)) return honoReq;
-  const nestReq: Omit<NestReqRequired, "headers" | "query" | "ip"> = {
+  const nestReq: Omit<NestReqRequired, "headers" | "query" | "body" | "ip"> = {
     rawBody,
-    body,
     session: ctx.get("session") ?? {},
     //hosts: {}, //nest sets up hosts automatically
     files: {}, //TODO files
@@ -29,24 +28,28 @@ export function createHonoReq(
 
   Object.defineProperties(honoReq, {
     headers: {
-      get() {
-        return headers ?? (headers = Object.fromEntries(honoReq.raw.headers));
+      get(this: Context) {
+        return headers ?? (headers = Object.fromEntries(this.req.raw.headers));
       },
       enumerable: true,
     },
-    // HonoRequest already has a query attribute, so we need to use a Proxy to override it
     query: {
-      value: new Proxy(ctx.req.query, {
-        get(rawQuery, key: string) {
-          if (!query) query = rawQuery.call(honoReq);
-          return query[key];
+      get(this: Context) {
+        return query ?? (query = this.req.query());
+      },
+      enumerable: true,
+    },
+    // Hono Context already has a body attribute, so we need to use a Proxy to override it
+    body: {
+      value: new Proxy(ctx.body, {
+        get(rawBody, key: string) {
+          return body[key];
         },
-        ownKeys(rawQuery) {
-          if (!query) query = rawQuery.call(honoReq);
-          return Object.keys(query);
+        ownKeys(rawBody) {
+          return Object.keys(body);
         },
-        apply(rawQuery, thisArg, args) {
-          return rawQuery.apply(thisArg, args as any);
+        apply(rawBody, thisArg, args) {
+          return rawBody.apply(ctx, args as any);
         },
       }),
       enumerable: true,
@@ -105,9 +108,9 @@ export function sendResult(ctx: Context, headers: Record<string, string>) {
   return response;
 }
 
-export type InternalHonoReq = NestReqRequired & HonoRequest;
+export type InternalHonoReq = NestReqRequired & Context;
 
-export type InternalHonoRes = Omit<Context, "req"> & {
+export type InternalHonoRes = Context & {
   send(data?: any): void;
 };
 

@@ -139,12 +139,12 @@ class Test {
 
 ```ts
 import type { HonoResponse } from "nest-hono-adapter";
-import type { HonoRequest } from "hono";
+import type { Context } from "hono";
 
 @Controller()
 class ExampleController {
   @Get("req")
-  req(@Req() req: HonoRequest) {
+  req(@Req() req: Context) {
     return req.path;
   }
   @Get("res") // request "/res" will response 'text'
@@ -158,10 +158,9 @@ class ExampleController {
 
 `res.send()` 签名为 send(response: Response)。 由于 nest 的机制，使用 `@Res()` 获取响应对象后，函数的返回值会被忽略
 
-### 未支持的装饰器
+### 参数装饰器获取的值
 
-| 装饰器       | 备注                         |
-| ------------ | ---------------------------- |
-| @Ip()        | 暂不支持                     |
-| @HostParam() | 暂时不清楚这个装饰器有什么用 |
-| @Session()   | 未测试                       |
+| 装饰器     | 备注                   |
+| ---------- | ---------------------- |
+| @Ip()      | 暂不支持               |
+| @Session() | Context.get("cession") |
