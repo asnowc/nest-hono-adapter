@@ -9,7 +9,7 @@ import { RequestMethod } from "@nestjs/common";
 import type { ErrorHandler, RequestHandler } from "@nestjs/common/interfaces";
 import { AbstractHttpAdapter } from "@nestjs/core/adapters/http-adapter.js";
 
-import type { BlankEnv, BlankSchema } from "hono/types";
+import type { BlankEnv, BlankSchema, MiddlewareHandler } from "hono/types";
 import type { NestHandler, NestHttpServerRequired } from "./_nest.ts";
 import { createHonoReq, createHonoRes, InternalHonoReq, InternalHonoRes, sendResult } from "./_util.ts";
 import type { HonoApplicationExtra, HonoBodyParser } from "./hono.impl.ts";
@@ -88,11 +88,9 @@ export abstract class HonoRouterAdapter
     const [routePath, routeHandler] = getRouteAndHandler(pathOrHandler, handler);
     this.instance.options(routePath, this.createRouteHandler(routeHandler));
   }
-  /**  */
-
-  override use(pathOrHandler: string | NestHonoHandler, handler?: NestHonoHandler) {
-    const [routePath, routeHandler] = getRouteAndHandler(pathOrHandler, handler);
-    this.instance.use(routePath, this.createRouteHandler(routeHandler));
+  override use(...handler: [string | MiddlewareHandler, ...MiddlewareHandler[]]): void {
+    //@ts-ignore
+    this.instance.use(...handler);
   }
 
   useBodyLimit(bodyLimit: number) {
@@ -218,44 +216,20 @@ export abstract class HonoRouterAdapter
   //implement
   createMiddlewareFactory(requestMethod: RequestMethod): (path: string, callback: Function) => any {
     return (path: string, callback: Function) => {
-      async function handler(ctx: Context, next: Function) {
-        await callback(ctx.req, ctx, next);
+      const nestMiddleware = callback as NestMiddlewareHandler;
+
+      async function handler(ctx: Context, next: () => Promise<void>) {
+        let calledNext = false;
+        await nestMiddleware(ctx, ctx, () => {
+          calledNext = true;
+        });
+        if (calledNext) return next();
       }
-      const hono = this.instance;
-      switch (requestMethod) {
-        case RequestMethod.ALL:
-          hono.all(path, handler);
-          break;
-        case RequestMethod.GET:
-          hono.get(path, handler);
-          break;
-        case RequestMethod.POST:
-          hono.post(path, handler);
-          break;
-        case RequestMethod.PUT:
-          hono.put(path, handler);
-          break;
-        case RequestMethod.DELETE:
-          hono.delete(path, handler);
-          break;
-        case RequestMethod.PATCH:
-          hono.patch(path, handler);
-          break;
-        case RequestMethod.OPTIONS:
-          hono.options(path, handler);
-          break;
-        // case RequestMethod.HEAD:
-        // case RequestMethod.SEARCH:
-        // case RequestMethod.PROPFIND:
-        // case RequestMethod.PROPPATCH:
-        // case RequestMethod.MKCOL:
-        // case RequestMethod.COPY:
-        // case RequestMethod.MOVE:
-        // case RequestMethod.LOCK:
-        // case RequestMethod.UNLOCK:
-        default:
-          console.warn("createMiddlewareFactory: 不支持的方法", requestMethod, RequestMethod[requestMethod]);
-          break;
+      if (requestMethod === RequestMethod.ALL || (requestMethod as number) === -1) {
+        this.instance.use(path, handler);
+      } else {
+        const method = RequestMethod[requestMethod];
+        this.instance.on(method, path, handler);
       }
     };
   }
@@ -269,6 +243,7 @@ export abstract class HonoRouterAdapter
   //@ts-ignore nest 10 implement
   override appendHeader = undefined;
 }
+type NestMiddlewareHandler = (req: Context, res: Context, next: () => void) => Promise<void>;
 function getRouteAndHandler(
   pathOrHandler: string | NestHonoHandler,
   handler?: NestHonoHandler,
