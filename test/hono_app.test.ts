@@ -77,13 +77,3 @@ test.runIf(globalThis.Deno)("Deno.serve", async () => {
     serve?.shutdown();
   }
 });
-
-//TODO
-test.skip("use", async () => {
-});
-test.skip("enableCros", async () => {
-});
-test.skip("useBodyParser", async () => {
-});
-test.skip("useWebSocketAdapter", async () => {
-});

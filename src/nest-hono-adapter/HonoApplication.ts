@@ -2,9 +2,12 @@ import type { INestApplication } from "@nestjs/common";
 import type { HonoApplicationExtra, HonoBodyParser } from "./hono.impl.ts";
 import type { CORSOptions } from "./_adapter.ts";
 import type { NestHttpServerRequired } from "./_nest.ts";
+import type { MiddlewareHandler } from "hono";
 
 export interface NestHonoApplication<TServer extends NestHttpServerRequired = NestHttpServerRequired>
   extends INestApplication<TServer>, HonoApplicationExtra {
+  use(...handlers: MiddlewareHandler[]): this;
+  use(path: string, ...handlers: MiddlewareHandler[]): this;
   // getHttpAdapter(): HonoAdapter;
   /**
    * By default, `application/json`, `application/x-www-form-urlencoded`, `multipart/form-data` and `text/plain` are automatically resolved
