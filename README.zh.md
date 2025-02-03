@@ -164,3 +164,61 @@ class ExampleController {
 | ---------- | ---------------------- |
 | @Ip()      | 暂不支持               |
 | @Session() | Context.get("cession") |
+
+### 中间件
+
+#### 全局中间件
+
+`app.use()` 与 `hono.use()` 接口保持一致
+
+```ts
+const app = await NestFactory.create<NestHonoApplication>(AppModule, new HonoAdapter());
+app.use(async function (ctx: Context, next) {
+  return ctx.text("1234");
+});
+```
+
+#### 模块中间件
+
+```ts
+@Controller()
+class TestController {
+  @Get("/test")
+  r1(@Req() req: Context) {
+    return req.get("var") ?? "0";
+  }
+  @Get("/test2")
+  r2(@Req() req: Context) {
+    return req.get("var") ?? "0";
+  }
+}
+
+@Module({ controllers: [TestController] })
+class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(async function (req: Context, res: Context, next: () => void) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      req.set("var", "123");
+      next();
+    }).forRoutes({ method: RequestMethod.GET, path: "/test" });
+
+    consumer.apply(function (req: Context, res: Context, next: () => void) {
+      req.set("var", "321");
+      next();
+    }).forRoutes({ method: RequestMethod.GET, path: "/test2" });
+  }
+}
+```
+
+与 Hono 中间件类似，如果 Promise 解决后未调用 `next()` 将会返回 500 状态码。
+
+```ts
+@Module({ controllers: [TestController] })
+class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(async function (req: Context, res: Context, next: Function) {
+      req.set("var", "123");
+    }).forRoutes({ method: RequestMethod.GET, path: "/test" });
+  }
+}
+```

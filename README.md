@@ -165,3 +165,61 @@ object, the function's return value is ignored
 | ---------- | ---------------------- |
 | @Ip()      | Not supported yet      |
 | @Session() | Context.get("cession") |
+
+### Middleware
+
+#### Global middleware
+
+`app.use()` 与 `hono.use()` 接口保持一致
+
+```ts
+const app = await NestFactory.create<NestHonoApplication>(AppModule, new HonoAdapter());
+app.use(async function (ctx: Context, next) {
+  return ctx.text("1234");
+});
+```
+
+#### Module middleware
+
+```ts
+@Controller()
+class TestController {
+  @Get("/test")
+  r1(@Req() req: Context) {
+    return req.get("var") ?? "0";
+  }
+  @Get("/test2")
+  r2(@Req() req: Context) {
+    return req.get("var") ?? "0";
+  }
+}
+
+@Module({ controllers: [TestController] })
+class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(async function (req: Context, res: Context, next: () => void) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      req.set("var", "123");
+      next();
+    }).forRoutes({ method: RequestMethod.GET, path: "/test" });
+
+    consumer.apply(function (req: Context, res: Context, next: () => void) {
+      req.set("var", "321");
+      next();
+    }).forRoutes({ method: RequestMethod.GET, path: "/test2" });
+  }
+}
+```
+
+Similar to Hono middleware, if `next()` is not called after the Promise is resolved, 500 status code will be returned.
+
+```ts
+@Module({ controllers: [TestController] })
+class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(async function (req: Context, res: Context, next: Function) {
+      req.set("var", "123");
+    }).forRoutes({ method: RequestMethod.GET, path: "/test" });
+  }
+}
+```
